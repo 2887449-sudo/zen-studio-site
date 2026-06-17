@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1"><stop stop-color="#070707"/><stop offset=".58" stop-color="#1b1714"/><stop offset="1" stop-color="#050505"/></linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#g)"/>
+  <path d="M0 690h1600v210H0z" fill="#080808"/>
+  <path d="M140 190h360v520H140zM560 120h290v590H560zM930 210h410v500H930z" fill="#151515" stroke="#2b2b2b"/>
+  <path d="M80 260h1420M80 500h1420" stroke="#e85b1c" stroke-opacity=".38" stroke-width="2"/>
+  <circle cx="1110" cy="330" r="150" fill="#e85b1c" opacity=".22"/>
+  <text x="110" y="780" fill="#e85b1c" font-family="Arial" font-size="72" font-weight="900">ZEN</text>
+</svg>
