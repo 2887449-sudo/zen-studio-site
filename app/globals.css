@@ -1454,6 +1454,134 @@ body {
   font-weight: 900;
 }
 
+.hero-carousel {
+  background: #050505;
+}
+
+.hero-bg-slide {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-bg-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.72) 37%, rgba(0, 0, 0, 0.2) 72%, rgba(0, 0, 0, 0.86) 100%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.88) 0%, transparent 34%, rgba(0, 0, 0, 0.5) 100%),
+    radial-gradient(circle at 72% 45%, rgba(232, 91, 28, 0.24), transparent 32%);
+  pointer-events: none;
+}
+
+.hero-bg-image {
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(1.04) contrast(1.08);
+}
+
+.hero-visual-poster {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 72% 28%, rgba(232, 91, 28, 0.32), transparent 24%),
+    linear-gradient(135deg, #0a0a0a, #1d130f 58%, #050505);
+}
+
+.hero-visual-poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, transparent 28%, rgba(0, 0, 0, 0.72) 100%),
+    radial-gradient(circle at 50% 50%, transparent 52%, rgba(0, 0, 0, 0.56) 100%);
+  pointer-events: none;
+}
+
+.hero-poster-image {
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.02);
+}
+
+.hero-visual-poster .poster-grid-lines,
+.hero-visual-poster .badge,
+.hero-visual-poster .poster-title {
+  z-index: 2;
+}
+
+.hero-slide-card {
+  backdrop-filter: blur(14px);
+}
+
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.34);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+  backdrop-filter: blur(12px);
+}
+
+.hero-arrow:hover {
+  border-color: rgba(232, 91, 28, 0.8);
+  background: rgba(232, 91, 28, 0.18);
+  transform: translateY(-50%) scale(1.04);
+}
+
+.hero-arrow-prev {
+  left: clamp(14px, 2.4vw, 34px);
+}
+
+.hero-arrow-next {
+  right: clamp(14px, 2.4vw, 34px);
+}
+
+.hero-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-50%);
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.hero-dots button {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  cursor: pointer;
+  transition: width 180ms ease, background 180ms ease;
+}
+
+.hero-dots button.active {
+  width: 24px;
+  background: var(--ember);
+}
+
 .series-rail {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px;
@@ -2030,6 +2158,22 @@ button.btn {
     max-width: 360px;
   }
 
+  .hero-carousel .home-hero-inner {
+    gap: 26px;
+    padding-top: 110px;
+    padding-bottom: 92px;
+  }
+
+  .hero-bg-slide::after {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.58) 48%, rgba(0, 0, 0, 0.92) 100%),
+      radial-gradient(circle at 62% 24%, rgba(232, 91, 28, 0.22), transparent 34%);
+  }
+
+  .hero-arrow {
+    display: none;
+  }
+
   .series-rail {
     display: grid;
     grid-auto-flow: column;
@@ -2054,12 +2198,40 @@ button.btn {
     width: min(100% - 28px, 1280px);
   }
 
+  .home-hero.cinematic-hero {
+    min-height: 760px;
+  }
+
   .hero-copy h1 {
-    font-size: 44px;
+    font-size: 42px;
+    line-height: 1.04;
+  }
+
+  .hero-lead {
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.65;
   }
 
   .hero-tags span {
     font-size: 12px;
+  }
+
+  .hero-slide-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .hero-poster-art {
+    height: 210px;
+  }
+
+  .hero-feature-meta h2 {
+    font-size: 21px;
+  }
+
+  .hero-dots {
+    bottom: 18px;
   }
 
   .series-grid,
