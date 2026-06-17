@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CreatorCooperation } from "@/components/CreatorCooperation";
+import { trackEvent } from "@/lib/analytics-events";
 
 const flowZh = ["提交IP", "内容评估", "角色与分镜开发", "漫剧上线", "平台推广"];
 const flowEn = ["Submit IP", "Content Review", "Character & Storyboard", "Launch Series", "Platform Promotion"];
@@ -40,7 +41,7 @@ export default function CreatorPage() {
             <h2>{locale === "zh" ? "提交你的作品" : "Submit Your Project"}</h2>
             <p>{locale === "zh" ? "欢迎原创作者、编剧和 IP 持有方提交项目。当前为 mock 表单，后续可接入 Supabase 表单与邮件通知。" : "Original creators, writers, and IP owners are welcome. This mock form can later connect to Supabase and email notifications."}</p>
           </div>
-          <form className="creator-form elevated-form" onSubmit={(event) => { event.preventDefault(); setSent(true); }}>
+          <form className="creator-form elevated-form" onSubmit={(event) => { event.preventDefault(); trackEvent("creator_submit_click", { source: "creator_form" }); setSent(true); }}>
             <input placeholder={locale === "zh" ? "姓名" : "Name"} />
             <input placeholder={locale === "zh" ? "邮箱" : "Email"} type="email" />
             <input placeholder={locale === "zh" ? "项目类型" : "Project Type"} />

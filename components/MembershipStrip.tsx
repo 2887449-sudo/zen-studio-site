@@ -3,6 +3,7 @@
 import { BadgeCheck, Download, Eye, LockKeyhole, Sparkles, Tv } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useToast } from "@/components/ToastProvider";
+import { trackEvent } from "@/lib/analytics-events";
 
 const benefitIcons = [LockKeyhole, Eye, Tv, BadgeCheck, Sparkles, Download];
 
@@ -21,7 +22,7 @@ export function MembershipStrip() {
           <p className="eyebrow">ZEN MEMBER</p>
           <h2>{copy.membershipTitle}</h2>
           <p>{copy.membershipSubtitle}</p>
-          <button type="button" className="btn primary" onClick={() => showToast(membershipMessage)}>{copy.subscribe}</button>
+          <button type="button" className="btn primary" onClick={() => { trackEvent("vip_cta_click", { source: "membership_strip" }); showToast(membershipMessage); }}>{copy.subscribe}</button>
         </div>
         <div className="benefit-grid">
           {benefits.map((benefit, index) => {

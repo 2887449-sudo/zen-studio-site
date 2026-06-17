@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useToast } from "@/components/ToastProvider";
+import { trackEvent } from "@/lib/analytics-events";
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -44,7 +45,7 @@ export function Header() {
             <UserRound size={15} />
             <span>{copy.login}</span>
           </button>
-          <button type="button" className="small-cta" onClick={() => showToast(membershipMessage)}>{copy.subscribe}</button>
+          <button type="button" className="small-cta" onClick={() => { trackEvent("vip_cta_click", { source: "header" }); showToast(membershipMessage); }}>{copy.subscribe}</button>
           <button className="menu-button" aria-label="Toggle menu" onClick={() => setOpen((value) => !value)}>
             {open ? <X size={24} /> : <Menu size={24} />}
           </button>

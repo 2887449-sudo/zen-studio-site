@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { SectionTitle } from "@/components/SectionTitle";
 import { SeriesCard } from "@/components/SeriesCard";
 import { useLanguage } from "@/components/LanguageProvider";
+import { trackEvent } from "@/lib/analytics-events";
 import { getSeriesCategories, getSeriesTitle, seriesList } from "@/lib/mock-data";
 
 const categoriesZh = ["全部", "校园", "悬疑", "科幻", "都市", "少女", "热血"];
@@ -45,14 +46,14 @@ export default function SeriesPage() {
           <div className="library-tools">
             <label className="search-box">
               <Search size={18} />
-              <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={locale === "zh" ? "搜索漫剧" : "Search series"} />
+              <input value={query} onChange={(event) => { const nextQuery = event.target.value; setQuery(nextQuery); trackEvent("search_series", { query: nextQuery }); }} placeholder={locale === "zh" ? "搜索漫剧" : "Search series"} />
             </label>
             <div className="filter-row">
               {categories.map((item) => (
-                <button key={item} className={`pill ${category === item ? "active" : ""}`} onClick={() => setCategory(item)} type="button">{item}</button>
+                <button key={item} className={`pill ${category === item ? "active" : ""}`} onClick={() => { setCategory(item); trackEvent("filter_series", { type: "category", value: item }); }} type="button">{item}</button>
               ))}
-              <button className={`pill ${vipOnly ? "active" : ""}`} onClick={() => setVipOnly((value) => !value)} type="button">VIP</button>
-              <button className={`pill ${updatingOnly ? "active" : ""}`} onClick={() => setUpdatingOnly((value) => !value)} type="button">{locale === "zh" ? "更新中" : "Updating"}</button>
+              <button className={`pill ${vipOnly ? "active" : ""}`} onClick={() => { setVipOnly((value) => { trackEvent("filter_series", { type: "vip", value: !value }); return !value; }); }} type="button">VIP</button>
+              <button className={`pill ${updatingOnly ? "active" : ""}`} onClick={() => { setUpdatingOnly((value) => { trackEvent("filter_series", { type: "updating", value: !value }); return !value; }); }} type="button">{locale === "zh" ? "更新中" : "Updating"}</button>
             </div>
           </div>
           <div className="series-grid">

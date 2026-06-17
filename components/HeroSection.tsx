@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import { SafeImage } from "@/components/SafeImage";
 import { useLanguage } from "@/components/LanguageProvider";
+import { trackEvent } from "@/lib/analytics-events";
 
 type HeroSlide = {
   titleZh: string;
@@ -107,8 +108,33 @@ export function HeroSection() {
     return () => window.clearInterval(timer);
   }, [paused]);
 
-  const goToSlide = (index: number) => setActiveIndex((index + heroSlides.length) % heroSlides.length);
+  useEffect(() => {
+    trackEvent("hero_view", {
+      slug: activeSlide.slug,
+      title: localized.title,
+      index: activeIndex
+    });
+  }, [activeIndex, activeSlide.slug, localized.title]);
+
+  const goToSlide = (index: number, action: "arrow" | "dot") => {
+    const nextIndex = (index + heroSlides.length) % heroSlides.length;
+    const nextSlide = heroSlides[nextIndex];
+    trackEvent("hero_click", {
+      action,
+      slug: nextSlide.slug,
+      title: locale === "zh" ? nextSlide.titleZh : nextSlide.titleEn,
+      index: nextIndex
+    });
+    setActiveIndex(nextIndex);
+  };
   const watchHref = getWatchHref(activeSlide.slug);
+  const trackHeroCta = () => {
+    trackEvent("hero_click", {
+      action: "cta",
+      slug: activeSlide.slug,
+      title: localized.title
+    });
+  };
 
   return (
     <section className="home-hero cinematic-hero hero-carousel" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
@@ -160,7 +186,7 @@ export function HeroSection() {
             {tags.map((tag) => <span key={tag}>{tag}</span>)}
           </motion.div>
           <motion.div className="hero-actions" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.18 }}>
-            <Link href={watchHref} className="btn primary">
+            <Link href={watchHref} className="btn primary" onClick={trackHeroCta}>
               <Play size={16} fill="currentColor" />
               {copy.startWatching}
             </Link>
@@ -197,7 +223,7 @@ export function HeroSection() {
               <div>
                 <span>{localized.episodeInfo}</span>
               </div>
-              <Link href={watchHref} className="hero-play-link">
+              <Link href={watchHref} className="hero-play-link" onClick={trackHeroCta}>
                 <Play size={16} fill="currentColor" />
                 {locale === "zh" ? "立即观看" : "Watch Now"}
               </Link>
@@ -205,10 +231,10 @@ export function HeroSection() {
           </AnimatePresence>
         </motion.div>
       </div>
-      <button className="hero-arrow hero-arrow-prev" type="button" aria-label="Previous hero" onClick={() => goToSlide(activeIndex - 1)}>
+      <button className="hero-arrow hero-arrow-prev" type="button" aria-label="Previous hero" onClick={() => goToSlide(activeIndex - 1, "arrow")}>
         <ChevronLeft size={22} />
       </button>
-      <button className="hero-arrow hero-arrow-next" type="button" aria-label="Next hero" onClick={() => goToSlide(activeIndex + 1)}>
+      <button className="hero-arrow hero-arrow-next" type="button" aria-label="Next hero" onClick={() => goToSlide(activeIndex + 1, "arrow")}>
         <ChevronRight size={22} />
       </button>
       <div className="hero-dots" aria-label="Hero slides">
@@ -218,7 +244,7 @@ export function HeroSection() {
             type="button"
             className={index === activeIndex ? "active" : ""}
             aria-label={`Show ${locale === "zh" ? slide.titleZh : slide.titleEn}`}
-            onClick={() => goToSlide(index)}
+            onClick={() => goToSlide(index, "dot")}
           />
         ))}
       </div>

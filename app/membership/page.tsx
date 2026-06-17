@@ -3,6 +3,7 @@
 import { Check, Crown, Sparkles } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useToast } from "@/components/ToastProvider";
+import { trackEvent } from "@/lib/analytics-events";
 
 const plans = [
   { zh: "免费用户", en: "Free", priceZh: "¥0", priceEn: "$0", perksZh: ["看预告", "第 1 话完整试看", "第 2 话 60 秒试看"], perksEn: ["Watch trailers", "Full episode 1", "60-second episode 2 preview"] },
@@ -18,8 +19,13 @@ export default function MembershipPage() {
   const { showToast } = useToast();
   const benefits = locale === "zh" ? benefitsZh : benefitsEn;
 
-  function handlePaymentClick() {
+  function handlePaymentClick(plan: (typeof plans)[number]) {
     console.log("TODO: connect payment provider");
+    trackEvent("membership_plan_click", {
+      plan: plan.en,
+      price: locale === "zh" ? plan.priceZh : plan.priceEn,
+      featured: Boolean(plan.featured)
+    });
     showToast(locale === "zh" ? "会员系统即将开放，敬请期待。" : "Membership is coming soon. Stay tuned.");
   }
 
@@ -55,7 +61,7 @@ export default function MembershipPage() {
                   <li key={perk}><Check size={16} />{perk}</li>
                 ))}
               </ul>
-              <button type="button" className="btn primary" onClick={handlePaymentClick}>
+              <button type="button" className="btn primary" onClick={() => handlePaymentClick(plan)}>
                 {locale === "zh" ? "选择方案" : "Choose Plan"}
               </button>
             </article>

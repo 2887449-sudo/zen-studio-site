@@ -5,6 +5,7 @@ import { Eye, Play, UsersRound } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Locale, Series } from "@/lib/mock-data";
 import { formatNumber, getSeriesCategories, getSeriesTitle } from "@/lib/mock-data";
+import { trackEvent } from "@/lib/analytics-events";
 
 type SeriesCardProps = {
   series: Series;
@@ -20,7 +21,13 @@ export function SeriesCard({ series, locale, featured = false }: SeriesCardProps
 
   return (
     <motion.article className={`series-card premium-card ${featured ? "featured-card" : ""} ${isUpcoming ? "upcoming-card" : ""}`} whileHover={{ y: -6 }}>
-      <Link href={href}>
+      <Link href={href} onClick={() => trackEvent("series_card_click", {
+        seriesId: series.id,
+        slug: series.slug,
+        title,
+        status: series.status,
+        source: "series_card"
+      })}>
         <div className={`poster-art poster-${series.slug}`}>
           <div className="poster-grid-lines" />
           <div className="poster-character" />

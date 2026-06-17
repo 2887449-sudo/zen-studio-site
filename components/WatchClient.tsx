@@ -6,6 +6,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { useToast } from "@/components/ToastProvider";
 import { VideoPlayerMock } from "@/components/VideoPlayerMock";
 import { VipLockOverlay } from "@/components/VipLockOverlay";
+import { trackEvent } from "@/lib/analytics-events";
 import { getEpisodeAccess, getEpisodeById, getSeriesById, getSeriesBySlug, getSeriesEpisodes } from "@/lib/mock-data";
 
 type WatchClientProps = {
@@ -69,7 +70,14 @@ export function WatchClient({ episodeId }: WatchClientProps) {
         <div className="container watch-layout">
           <div>
             <div className="watch-frame">
-              <VideoPlayerMock title={title} access={access} locale={locale} />
+              <VideoPlayerMock title={title} access={access} locale={locale} onPlay={() => trackEvent("episode_play_click", {
+                source: "watch_player",
+                seriesId: series.id,
+                slug: series.slug,
+                episodeId: episode.id,
+                episodeNumber: episode.episodeNumber,
+                access
+              })} />
               {locked ? <VipLockOverlay backHref={`/series/${series.slug}`} /> : null}
             </div>
             {access === "preview" ? (
@@ -101,7 +109,7 @@ export function WatchClient({ episodeId }: WatchClientProps) {
             <div className="watch-actions">
               <Link href={`/watch/${prevEpisode}`} className="btn dark-outline"><ChevronLeft size={16} />{locale === "zh" ? "上一集" : "Previous"}</Link>
               <Link href={`/series/${series.slug}`} className="btn dark-outline">{locale === "zh" ? "返回详情" : "Back to Series"}</Link>
-              <button type="button" className="btn primary" onClick={() => showToast(membershipMessage)}>{locale === "zh" ? "立即开通会员" : "Join Now"}</button>
+              <button type="button" className="btn primary" onClick={() => { trackEvent("vip_cta_click", { source: "watch_actions", seriesId: series.id, slug: series.slug, episodeId: episode.id, access }); showToast(membershipMessage); }}>{locale === "zh" ? "立即开通会员" : "Join Now"}</button>
               <Link href={`/watch/${nextEpisode}`} className="btn dark-outline">{locale === "zh" ? "下一集" : "Next"}<ChevronRight size={16} /></Link>
             </div>
           </div>

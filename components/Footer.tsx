@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useToast } from "@/components/ToastProvider";
+import { trackEvent } from "@/lib/analytics-events";
 
 const legalLinks = [
   { href: "/privacy", zh: "隐私政策", en: "Privacy" },
@@ -38,7 +39,7 @@ export function Footer() {
             {nav.slice(4).map((item) => (
               <Link key={item.href} href={item.href}>{item.label}</Link>
             ))}
-            <button type="button" className="footer-link-button" onClick={() => showToast(membershipMessage)}>
+            <button type="button" className="footer-link-button" onClick={() => { trackEvent("vip_cta_click", { source: "footer" }); showToast(membershipMessage); }}>
               {zh ? "立即开通" : "Join Now"}
             </button>
           </div>

@@ -65,3 +65,11 @@ npm run build
 - 当前播放页使用 mock 播放器。
 - 后续可接 Bunny Stream、Cloudflare Stream 或 Mux。
 - 推荐按 episodeId 获取签名播放地址，并在 VIP 剧集上做服务端权限校验。
+
+## V0.2 Admin Analytics Preview
+
+- `/admin` provides a lightweight operations preview for local event analytics.
+- Set `ADMIN_PASSWORD` in Vercel Environment Variables for production. If it is not set, local development uses `zen-admin-2026`.
+- Events are logged to the browser console and stored in localStorage for the current browser.
+- Supabase insertion is reserved through `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Future Supabase schema draft is available in `lib/supabase-schema.sql`.

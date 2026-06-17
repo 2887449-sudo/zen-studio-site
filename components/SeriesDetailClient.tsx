@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Heart, LockKeyhole, Play } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
+import { trackEvent } from "@/lib/analytics-events";
 import { formatNumber, getEpisodeAccess, getSeriesBySlug, getSeriesCategories, getSeriesDescription, getSeriesEpisodes, getSeriesTitle } from "@/lib/mock-data";
 
 type SeriesDetailClientProps = {
@@ -53,8 +54,8 @@ export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
               <span>{series.isVip ? "VIP" : locale === "zh" ? "免费试看" : "Free preview"}</span>
             </div>
             <div className="hero-actions">
-              <Link href={series.status === "upcoming" ? "/series" : `/watch/${series.slug}-ep-1`} className="btn primary"><Play size={16} fill="currentColor" />{locale === "zh" ? "开始观看" : "Start Watching"}</Link>
-              <button type="button" className="btn dark-outline"><Heart size={16} />{locale === "zh" ? "收藏" : "Save"}</button>
+              <Link href={series.status === "upcoming" ? "/series" : `/watch/${series.slug}-ep-1`} className="btn primary" onClick={() => trackEvent("episode_play_click", { source: "series_detail_start", seriesId: series.id, slug: series.slug, title })}><Play size={16} fill="currentColor" />{locale === "zh" ? "开始观看" : "Start Watching"}</Link>
+              <button type="button" className="btn dark-outline" onClick={() => trackEvent("favorite_click", { seriesId: series.id, slug: series.slug, title })}><Heart size={16} />{locale === "zh" ? "收藏" : "Save"}</button>
             </div>
             <p className="small-meta">{formatNumber(series.views, locale)} {locale === "zh" ? "播放" : "views"} / {formatNumber(series.followers, locale)} {locale === "zh" ? "追更" : "followers"}</p>
           </div>
