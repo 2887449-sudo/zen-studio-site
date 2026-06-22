@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Heart, LockKeyhole, Play } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { trackEvent } from "@/lib/analytics-events";
-import { formatNumber, getEpisodeAccess, getSeriesBySlug, getSeriesCategories, getSeriesDescription, getSeriesEpisodes, getSeriesTitle } from "@/lib/mock-data";
+import { formatNumber, getEpisodeAccess, getSeriesCategories, getSeriesDescription, getSeriesTitle } from "@/lib/mock-data";
+import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 type SeriesDetailClientProps = {
   slug: string;
@@ -12,7 +13,8 @@ type SeriesDetailClientProps = {
 
 export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
   const { locale } = useLanguage();
-  const series = getSeriesBySlug(slug);
+  const content = usePublishedContent();
+  const series = content.series.find((item) => item.slug === slug);
 
   if (!series) {
     return (
@@ -28,7 +30,7 @@ export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
     );
   }
 
-  const episodes = getSeriesEpisodes(series.id);
+  const episodes = content.episodes.filter((episode) => episode.seriesId === series.id);
   const title = getSeriesTitle(series, locale);
   const categories = getSeriesCategories(series, locale);
 
@@ -74,7 +76,7 @@ export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
                     ? locale === "zh" ? "试看" : "Preview"
                     : locale === "zh" ? "会员专享" : "Members";
                 return (
-                  <Link href={`/watch/${episode.id}`} className="episode-row" key={episode.id}>
+                  <Link href={`/watch/${episode.id}`} className="episode-row" key={episode.id} onClick={() => trackEvent("episode_play_click", { source: "series_detail_episode", seriesId: series.id, slug: series.slug, episodeId: episode.id, episodeNumber: episode.episodeNumber, access })}>
                     <span>{locale === "zh" ? `第 ${episode.episodeNumber} 话` : `Episode ${episode.episodeNumber}`}</span>
                     <strong>{locale === "zh" ? episode.titleZh : episode.titleEn}</strong>
                     <em>{episode.duration}</em>

@@ -6,7 +6,8 @@ import { SectionTitle } from "@/components/SectionTitle";
 import { SeriesCard } from "@/components/SeriesCard";
 import { useLanguage } from "@/components/LanguageProvider";
 import { trackEvent } from "@/lib/analytics-events";
-import { getSeriesCategories, getSeriesTitle, seriesList } from "@/lib/mock-data";
+import { getSeriesCategories, getSeriesTitle } from "@/lib/mock-data";
+import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 const categoriesZh = ["全部", "校园", "悬疑", "科幻", "都市", "少女", "热血"];
 const categoriesEn = ["All", "School", "Mystery", "Sci-Fi", "Urban", "Girlhood", "Action"];
@@ -17,19 +18,20 @@ export default function SeriesPage() {
   const [category, setCategory] = useState(locale === "zh" ? "全部" : "All");
   const [vipOnly, setVipOnly] = useState(false);
   const [updatingOnly, setUpdatingOnly] = useState(false);
+  const { series } = usePublishedContent();
   const categories = locale === "zh" ? categoriesZh : categoriesEn;
   const allLabel = locale === "zh" ? "全部" : "All";
 
   const filtered = useMemo(() => {
-    return seriesList.filter((series) => {
-      const title = getSeriesTitle(series, locale).toLowerCase();
+    return series.filter((item) => {
+      const title = getSeriesTitle(item, locale).toLowerCase();
       const matchesQuery = !query || title.includes(query.toLowerCase());
-      const matchesCategory = category === allLabel || getSeriesCategories(series, locale).includes(category);
-      const matchesVip = !vipOnly || series.isVip;
-      const matchesUpdating = !updatingOnly || series.badge === "更新中";
+      const matchesCategory = category === allLabel || getSeriesCategories(item, locale).includes(category);
+      const matchesVip = !vipOnly || item.isVip;
+      const matchesUpdating = !updatingOnly || item.badge === "更新中";
       return matchesQuery && matchesCategory && matchesVip && matchesUpdating;
     });
-  }, [allLabel, category, locale, query, updatingOnly, vipOnly]);
+  }, [allLabel, category, locale, query, series, updatingOnly, vipOnly]);
 
   return (
     <main className="page subpage">

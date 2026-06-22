@@ -2045,6 +2045,101 @@ button.btn {
   font-weight: 800;
 }
 
+.admin-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.admin-nav a {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text);
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.68);
+  font-weight: 900;
+}
+
+.admin-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.admin-edit-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-edit-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-edit-form input,
+.admin-edit-form textarea,
+.admin-edit-form select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  padding: 12px 13px;
+  outline: none;
+}
+
+.admin-edit-form textarea {
+  min-height: 106px;
+  resize: vertical;
+}
+
+.admin-edit-form .admin-check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-edit-form .btn {
+  align-self: end;
+  justify-self: start;
+}
+
+.admin-table-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.admin-table-actions a,
+.admin-table-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--orange);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+  padding: 0;
+}
+
+.player-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.player-video + .player-play {
+  z-index: 2;
+}
+
 @media (max-width: 980px) {
   .admin-head,
   .admin-grid-2 {

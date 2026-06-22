@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { Flame, UsersRound } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
-import { formatNumber, getSeriesBySlug, getSeriesCategories, getSeriesTitle, rankingSeries } from "@/lib/mock-data";
+import { formatNumber, getSeriesCategories, getSeriesTitle, rankingSeries } from "@/lib/mock-data";
+import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 export function RankingPanel() {
   const { locale } = useLanguage();
-  const series = rankingSeries.map(getSeriesBySlug).filter((item) => item !== undefined);
-  const maxFollowers = Math.max(...series.map((item) => item.followers));
+  const content = usePublishedContent();
+  const series = rankingSeries.map((slug) => content.series.find((item) => item.slug === slug)).filter((item) => item !== undefined);
+  const maxFollowers = Math.max(1, ...series.map((item) => item.followers));
 
   return (
     <div className="ranking-panel rich-ranking">

@@ -7,26 +7,28 @@ import { useToast } from "@/components/ToastProvider";
 import { VideoPlayerMock } from "@/components/VideoPlayerMock";
 import { VipLockOverlay } from "@/components/VipLockOverlay";
 import { trackEvent } from "@/lib/analytics-events";
-import { getEpisodeAccess, getEpisodeById, getSeriesById, getSeriesBySlug, getSeriesEpisodes } from "@/lib/mock-data";
+import { getEpisodeAccess } from "@/lib/mock-data";
+import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 type WatchClientProps = {
   episodeId: string;
 };
 
-function resolveEpisode(rawId: string) {
-  const direct = getEpisodeById(rawId);
+function resolveEpisode(rawId: string, episodes: ReturnType<typeof usePublishedContent>["episodes"], seriesList: ReturnType<typeof usePublishedContent>["series"]) {
+  const direct = episodes.find((episode) => episode.id === rawId);
   if (direct) return direct;
   const parts = rawId.match(/(.+)-ep-(\d+)$/);
   if (!parts) return undefined;
-  const series = getSeriesBySlug(parts[1]);
+  const series = seriesList.find((item) => item.slug === parts[1]);
   if (!series) return undefined;
-  return getEpisodeById(`${series.slug}-ep-${parts[2]}`);
+  return episodes.find((episode) => episode.id === `${series.slug}-ep-${parts[2]}`);
 }
 
 export function WatchClient({ episodeId }: WatchClientProps) {
   const { locale } = useLanguage();
   const { showToast } = useToast();
-  const episode = resolveEpisode(episodeId);
+  const content = usePublishedContent();
+  const episode = resolveEpisode(episodeId, content.episodes, content.series);
   const membershipMessage = locale === "zh" ? "会员系统即将开放，敬请期待。" : "Membership is coming soon. Stay tuned.";
 
   if (!episode) {
@@ -43,7 +45,7 @@ export function WatchClient({ episodeId }: WatchClientProps) {
     );
   }
 
-  const series = getSeriesById(episode.seriesId);
+  const series = content.series.find((item) => item.id === episode.seriesId);
   if (!series) {
     return (
       <main className="page subpage">
@@ -62,7 +64,7 @@ export function WatchClient({ episodeId }: WatchClientProps) {
   const title = `${locale === "zh" ? series.titleZh : series.titleEn} ${locale === "zh" ? episode.titleZh : episode.titleEn}`;
   const prevEpisode = episode.episodeNumber > 1 ? `${series.slug}-ep-${episode.episodeNumber - 1}` : `${series.slug}-ep-1`;
   const nextEpisode = `${series.slug}-ep-${Math.min(series.episodeCount, episode.episodeNumber + 1)}`;
-  const episodeList = getSeriesEpisodes(series.id).slice(0, 8);
+  const episodeList = content.episodes.filter((item) => item.seriesId === series.id).slice(0, 8);
 
   return (
     <main className="page watch-page">
@@ -77,7 +79,7 @@ export function WatchClient({ episodeId }: WatchClientProps) {
                 episodeId: episode.id,
                 episodeNumber: episode.episodeNumber,
                 access
-              })} />
+              })} videoUrl={episode.videoUrl} />
               {locked ? <VipLockOverlay backHref={`/series/${series.slug}`} /> : null}
             </div>
             {access === "preview" ? (

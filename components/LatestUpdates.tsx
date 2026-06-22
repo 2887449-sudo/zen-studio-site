@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
-import { getSeriesBySlug, getSeriesCategories, getSeriesTitle, latestUpdates } from "@/lib/mock-data";
+import { getSeriesCategories, getSeriesTitle, latestUpdates } from "@/lib/mock-data";
+import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 export function LatestUpdates() {
   const { locale } = useLanguage();
-  const items = latestUpdates.map((item) => ({ ...item, series: getSeriesBySlug(item.seriesSlug) })).filter((item) => item.series);
+  const { series } = usePublishedContent();
+  const items = latestUpdates.map((item) => ({ ...item, series: series.find((entry) => entry.slug === item.seriesSlug) })).filter((item) => item.series);
 
   return (
     <div className="updates-list rich-updates">

@@ -13,5 +13,6 @@ yarn-error.log*
 pnpm-debug.log*
 dev.out.log
 dev.err.log
+dev-*.log
 .vercel/
 .DS_Store

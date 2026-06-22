@@ -3,6 +3,7 @@
 export type AnalyticsPayload = Record<string, string | number | boolean | null>;
 
 export type AnalyticsEvent = {
+  id: string;
   eventName: string;
   payload?: AnalyticsPayload;
   path: string;
@@ -22,6 +23,7 @@ function readLocalEvents(): AnalyticsEvent[] {
     return parsed.filter((event): event is AnalyticsEvent => (
       typeof event === "object" &&
       event !== null &&
+      typeof event.id === "string" &&
       typeof event.eventName === "string" &&
       typeof event.path === "string" &&
       typeof event.createdAt === "string"
@@ -41,6 +43,13 @@ function writeLocalEvent(event: AnalyticsEvent) {
   }
 }
 
+function createEventId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `event-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 async function insertSupabaseEvent(event: AnalyticsEvent) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -56,6 +65,7 @@ async function insertSupabaseEvent(event: AnalyticsEvent) {
         Prefer: "return=minimal"
       },
       body: JSON.stringify({
+        id: event.id,
         event_name: event.eventName,
         path: event.path,
         payload: event.payload ?? {},
@@ -71,6 +81,7 @@ export function trackEvent(eventName: string, payload?: AnalyticsPayload) {
   if (typeof window === "undefined") return;
 
   const event: AnalyticsEvent = {
+    id: createEventId(),
     eventName,
     payload,
     path: window.location.pathname,

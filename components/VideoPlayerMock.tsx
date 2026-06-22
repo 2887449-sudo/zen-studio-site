@@ -8,9 +8,10 @@ type VideoPlayerMockProps = {
   access: EpisodeAccess;
   locale: Locale;
   onPlay?: () => void;
+  videoUrl?: string;
 };
 
-export function VideoPlayerMock({ title, access, locale, onPlay }: VideoPlayerMockProps) {
+export function VideoPlayerMock({ title, access, locale, onPlay, videoUrl }: VideoPlayerMockProps) {
   const status = access === "free"
     ? locale === "zh" ? "正在播放免费剧集" : "Playing a free episode"
     : access === "preview"
@@ -20,12 +21,15 @@ export function VideoPlayerMock({ title, access, locale, onPlay }: VideoPlayerMo
   return (
     <div className="video-player">
       <div className="player-topline">{title}</div>
+      {videoUrl ? (
+        <video className="player-video" src={videoUrl} controls preload="metadata" onPlay={onPlay} />
+      ) : null}
       <button type="button" className="player-play" aria-label="Play" onClick={onPlay}>
         <Play size={34} fill="currentColor" />
       </button>
       <div className="player-caption">
         <strong>{title}</strong>
-        <span>{status}</span>
+        <span>{videoUrl ? videoUrl : status}</span>
       </div>
     </div>
   );

@@ -10,11 +10,12 @@ import { SectionTitle } from "@/components/SectionTitle";
 import { SeriesCard } from "@/components/SeriesCard";
 import { useLanguage } from "@/components/LanguageProvider";
 import { Reveal } from "@/components/Reveal";
-import { seriesList } from "@/lib/mock-data";
+import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 export default function Home() {
   const { locale, copy } = useLanguage();
-  const featuredSeries = seriesList.filter((series) => series.status === "live").slice(0, 4);
+  const { series } = usePublishedContent();
+  const featuredSeries = series.filter((item) => item.status === "live").slice(0, 4);
 
   return (
     <main className="page">
