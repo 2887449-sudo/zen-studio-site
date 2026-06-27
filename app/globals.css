@@ -2082,6 +2082,12 @@ button.btn {
   font-weight: 900;
 }
 
+.admin-edit-form label small {
+  color: rgba(18, 18, 18, 0.46);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .admin-edit-form input,
 .admin-edit-form textarea,
 .admin-edit-form select {
