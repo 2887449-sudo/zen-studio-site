@@ -32,6 +32,7 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
     const data = await response.json() as { ok?: boolean };
     if (data.ok) {
       window.sessionStorage.setItem(SESSION_KEY, "true");
+      window.sessionStorage.setItem("zen_admin_token", password);
       setAuthed(true);
       return;
     }
@@ -60,9 +61,12 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
     <main className="admin-page">
       <section className="admin-shell">
         <nav className="admin-nav">
-          <Link href="/admin">统计总览</Link>
+          <Link href="/admin">数据总览</Link>
           <Link href="/admin/series">作品管理</Link>
           <Link href="/admin/episodes">剧集管理</Link>
+          <Link href="/admin/hero">Hero 管理</Link>
+          <Link href="/admin/media">素材管理</Link>
+          <Link href="/admin/settings">网站设置</Link>
         </nav>
         {children}
       </section>

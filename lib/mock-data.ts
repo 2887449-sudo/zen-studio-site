@@ -33,6 +33,7 @@ export type Episode = {
   videoUrl?: string;
   isVip: boolean;
   isFree: boolean;
+  accessType?: EpisodeAccess;
   duration: string;
   releaseDate: string;
 };
@@ -317,6 +318,7 @@ export function getEpisodeById(episodeId: string) {
 }
 
 export function getEpisodeAccess(episode: Episode): EpisodeAccess {
+  if (episode.accessType) return episode.accessType;
   if (episode.isFree) return "free";
   if (episode.episodeNumber === 2) return "preview";
   return "vip";

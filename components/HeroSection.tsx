@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SafeImage } from "@/components/SafeImage";
 import { useLanguage } from "@/components/LanguageProvider";
 import { trackEvent } from "@/lib/analytics-events";
+import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 type HeroSlide = {
   titleZh: string;
@@ -23,7 +24,7 @@ type HeroSlide = {
   categoryEn: string;
 };
 
-const heroSlides: HeroSlide[] = [
+const defaultHeroSlides: HeroSlide[] = [
   {
     titleZh: "小汐的校园显眼包日记",
     titleEn: "Xiaoxi's Campus Spotlight Diary",
@@ -88,9 +89,24 @@ function getWatchHref(slug: string) {
 
 export function HeroSection() {
   const { locale, copy } = useLanguage();
+  const { heroSlides: cmsHeroSlides } = usePublishedContent();
+  const heroSlides = useMemo(() => cmsHeroSlides.length ? cmsHeroSlides.map((slide) => ({
+    titleZh: slide.titleZh,
+    titleEn: slide.titleEn || slide.titleZh,
+    subtitleZh: slide.subtitleZh || "",
+    subtitleEn: slide.subtitleEn || slide.subtitleZh || "",
+    badgeZh: slide.badgeZh || "主推新作",
+    badgeEn: slide.badgeEn || slide.badgeZh || "Featured",
+    episodeInfoZh: slide.episodeInfoZh || "",
+    episodeInfoEn: slide.episodeInfoEn || slide.episodeInfoZh || "",
+    image: slide.imageUrl || "/images/hero/hero-xiaoxi.jpg",
+    slug: slide.seriesSlug || "xiaoxi-campus-diary",
+    categoryZh: slide.badgeZh || "原创漫剧",
+    categoryEn: slide.badgeEn || "Original Series"
+  })) : defaultHeroSlides, [cmsHeroSlides]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const activeSlide = heroSlides[activeIndex];
+  const activeSlide = heroSlides[activeIndex] ?? heroSlides[0];
   const tags = locale === "zh" ? ["原创漫剧", "会员追更", "高清动态漫画"] : ["Original Series", "Member Updates", "HD Motion Comics"];
   const localized = useMemo(() => ({
     title: locale === "zh" ? activeSlide.titleZh : activeSlide.titleEn,
@@ -106,7 +122,11 @@ export function HeroSection() {
       setActiveIndex((current) => (current + 1) % heroSlides.length);
     }, 6000);
     return () => window.clearInterval(timer);
-  }, [paused]);
+  }, [heroSlides.length, paused]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [heroSlides.length]);
 
   useEffect(() => {
     trackEvent("hero_view", {

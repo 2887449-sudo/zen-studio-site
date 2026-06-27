@@ -1,0 +1,27 @@
+import { NextResponse } from "next/server";
+import { createEpisode, listEpisodes } from "@/lib/db/episodes";
+import { isAdminRequest, unauthorizedResponse } from "@/lib/db/auth";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+
+export async function GET(request: Request) {
+  if (!isAdminRequest(request)) return unauthorizedResponse();
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return NextResponse.json({ mode: "local", items: [], message: "Supabase is not configured." });
+  try {
+    return NextResponse.json({ mode: "supabase", items: await listEpisodes(supabase) });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to list episodes" }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  if (!isAdminRequest(request)) return unauthorizedResponse();
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) return NextResponse.json({ mode: "local", item: null, message: "Supabase is not configured." }, { status: 503 });
+  try {
+    const body = await request.json();
+    return NextResponse.json({ mode: "supabase", item: await createEpisode(supabase, body) });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to create episode" }, { status: 500 });
+  }
+}

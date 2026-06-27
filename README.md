@@ -1,6 +1,8 @@
 # ZEN 漫剧宇宙 / ZEN Motion Comics Universe
 
-ZEN 漫剧宇宙是一个高端、沉浸式、可会员付费观看的 AI 动态漫画平台 MVP。当前版本聚焦原创漫剧展示、免费试看、会员锁定、创作者合作和 Vercel 上线准备。
+ZEN 漫剧宇宙是一个 AI 动态漫画平台，当前版本进入 V0.2.5：真实后台 CMS 基础版。
+
+线上地址：https://www.qmcg.work
 
 ## 技术栈
 
@@ -8,9 +10,8 @@ ZEN 漫剧宇宙是一个高端、沉浸式、可会员付费观看的 AI 动态
 - TypeScript
 - Tailwind CSS
 - Framer Motion
-- lucide-react
-- 本地 mock data
-- 轻量前端 i18n 状态切换
+- Supabase JS Client
+- Vercel
 
 ## 本地运行
 
@@ -19,57 +20,120 @@ npm install
 npm run dev
 ```
 
-打开 `http://localhost:3000`。
+默认本地地址：http://localhost:3000
 
-## 构建
+## 后台访问
 
-```bash
-npm run build
+后台入口不放在前台导航里，请直接访问：
+
+```text
+/admin
 ```
 
-## 当前功能
+本地默认后台密码：
 
-- 首页：电影级 Hero、精选漫剧、会员权益、最新更新、本周热榜、创作者与 IP 合作。
-- 漫剧库：搜索、分类筛选、VIP 筛选、更新状态筛选。
-- 漫剧详情：大横幅背景、简介、分类标签、播放量、追更人数、剧集列表。
-- 播放页：第 1 话免费、第 2 话试看 60 秒、第 3 话以后会员锁定。
-- 会员中心：免费、月度、年度三档 mock 方案。
-- 排行榜：热播榜、新作榜、收藏榜、会员榜。
-- 创作者计划：原创 IP 孵化、漫剧定制、角色设定、分镜策划、AI 动态漫画制作支持、平台联合推广。
-- 法律页面：隐私政策、用户协议、版权声明、联系我们。
+```text
+zen-admin-2026
+```
 
-## 部署到 Vercel
+生产环境请在 Vercel 配置 `ADMIN_PASSWORD`。
 
-1. 将项目推送到 GitHub / GitLab / Bitbucket。
-2. 在 Vercel 新建项目并选择该仓库。
-3. Framework Preset 选择 `Next.js`。
-4. Build Command 使用 `npm run build`。
-5. Output Directory 保持默认。
-6. 在 Environment Variables 中参考 `.env.example` 配置变量。
-7. 点击 Deploy。
+## Supabase 环境变量
 
-## 后续接 Supabase
+```text
+NEXT_PUBLIC_SITE_URL=https://www.qmcg.work
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+ADMIN_PASSWORD=zen-admin-2026
+```
 
-- 将 `lib/mock-data.ts` 中的 Series / Episode 类型迁移到 Supabase 表。
-- 接入 Supabase Auth 管理登录、会员状态和收藏。
-- 用服务端组件或 route handlers 读取真实剧集数据。
+`SUPABASE_SERVICE_ROLE_KEY` 只在服务端 API 使用，不会暴露到前端。
 
-## 后续接支付
+如果 Supabase 未配置，后台会显示本地/模拟数据模式，数据不会同步线上；前台会继续使用 mock 数据。
 
-- 当前支付按钮只显示“会员系统即将开放，敬请期待。”并输出 `TODO: connect payment provider`。
-- 后续可接 Stripe、Lemon Squeezy 或 Paddle。
-- 推荐流程：创建 checkout session、处理 webhook、更新用户会员状态。
+## 创建数据库表
 
-## 后续接视频托管
+在 Supabase SQL Editor 执行：
 
-- 当前播放页使用 mock 播放器。
-- 后续可接 Bunny Stream、Cloudflare Stream 或 Mux。
-- 推荐按 episodeId 获取签名播放地址，并在 VIP 剧集上做服务端权限校验。
+```text
+supabase/schema.sql
+```
 
-## V0.2 Admin Analytics Preview
+该文件包含：
 
-- `/admin` provides a lightweight operations preview for local event analytics.
-- Set `ADMIN_PASSWORD` in Vercel Environment Variables for production. If it is not set, local development uses `zen-admin-2026`.
-- Events are logged to the browser console and stored in localStorage for the current browser.
-- Supabase insertion is reserved through `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-- Future Supabase schema draft is available in `lib/supabase-schema.sql`.
+- `series`
+- `episodes`
+- `hero_slides`
+- `analytics_events`
+
+## 创建 Storage Bucket
+
+需要创建并设为 public 的 bucket：
+
+- `series-covers`
+- `series-heroes`
+- `episode-thumbnails`
+- `hero-slides`
+
+表单图片上传会进入对应 bucket，并把公开 URL 写入数据库字段。
+
+## 新增作品
+
+1. 进入 `/admin`
+2. 打开“作品管理”
+3. 点击“新增作品”
+4. 填写标题、slug、简介、分类、封面、Hero 图、VIP、首页推荐、状态和排序
+5. 状态设为 `published` 后，前台会优先读取 Supabase 数据
+
+## 修改作品名称
+
+进入“作品管理”，点击作品行里的“编辑”，修改中文标题或英文标题后保存。
+
+## 新增剧集
+
+1. 进入“剧集管理”
+2. 点击“新增剧集”
+3. 选择所属作品
+4. 填写第几话、标题、缩略图、访问权限、时长、发布日期和状态
+5. 状态设为 `published` 后，前台详情页和播放页会优先读取
+
+## 修改剧集标题
+
+进入“剧集管理”，点击剧集行里的“编辑”，修改中文标题或英文标题后保存。
+
+## 上传封面图
+
+作品表单中的“封面图”和“Hero 图”支持上传图片：
+
+- 支持 jpg / jpeg / png / webp
+- 单张图片限制 10MB
+- 上传前会显示预览
+- 上传成功后会自动填入公开 URL
+- 如果 Supabase Storage 未配置，可以手动填写 URL
+
+## 视频地址填写
+
+当前不做真实视频上传，只填写视频地址：
+
+```text
+/videos/xiaoxi-ep01-preview.mp4
+https://视频平台地址/xxx.mp4
+```
+
+后续可接 Bunny Stream、Cloudflare Stream 或 Mux 等专业视频托管。
+
+## 播放规则
+
+- `free`：免费完整观看
+- `preview`：试看 60 秒提示
+- `vip`：显示 VIP 遮罩
+
+所有“开通会员”按钮仍只提示“会员系统即将开放，敬请期待。”，当前不接真实支付。
+
+## 检查
+
+```bash
+npm run lint
+npm run build
+```

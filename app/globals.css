@@ -2127,6 +2127,78 @@ button.btn {
   padding: 0;
 }
 
+.admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.admin-filter-bar input,
+.admin-filter-bar select,
+.admin-sort-input {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  padding: 10px 12px;
+  outline: none;
+}
+
+.admin-sort-input {
+  width: 74px;
+}
+
+.admin-thumb {
+  width: 64px;
+  height: 42px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.admin-image-field img {
+  width: 160px;
+  height: 92px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.admin-image-field small,
+.admin-note {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.admin-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.admin-form-error {
+  color: #bd3b16;
+  font-weight: 900;
+}
+
+.admin-bucket-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-bucket-grid div {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 16px;
+  font-weight: 900;
+}
+
 .player-video {
   position: absolute;
   inset: 0;
