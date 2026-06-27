@@ -74,7 +74,7 @@ export default function AdminSeriesPage() {
           <h1>作品管理</h1>
           <p>{mode === "local" ? "当前为本地/模拟数据模式，数据不会同步线上。" : "当前已连接 Supabase。"}</p>
         </div>
-        <Link href="/admin/series/new" className="btn primary">新增作品</Link>
+        <Link href="/admin/series/new" className="btn primary">上传作品</Link>
       </div>
       <section className="admin-panel">
         <div className="admin-filter-bar">

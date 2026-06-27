@@ -77,10 +77,24 @@ export default function AdminPage() {
           <p>当前使用 localStorage + console 记录事件；未来接入 Supabase 时可平滑迁移。</p>
         </div>
         <div className="admin-head-actions">
-          <Link href="/admin/series/new" className="btn primary">新增作品</Link>
+          <Link href="/admin/series/new" className="btn primary">上传作品</Link>
           <button type="button" className="btn dark-outline" onClick={() => setEvents(getStoredAnalyticsEvents())}>刷新数据</button>
         </div>
       </div>
+
+      <section className="admin-panel">
+        <h2>上传你的故事，先做这 2 步</h2>
+        <div className="admin-upload-steps">
+          <Link href="/admin/series/new">
+            <strong>1. 上传作品资料</strong>
+            <span>填写作品名、简介、分类，上传封面图和推荐图。</span>
+          </Link>
+          <Link href="/admin/episodes/new">
+            <strong>2. 上传剧集内容</strong>
+            <span>选择所属作品，填写第几话、标题、缩略图和视频地址。</span>
+          </Link>
+        </div>
+      </section>
 
       <div className="admin-stat-grid">
         <div><Eye size={20} /><span>今日事件数</span><strong>{stats.totalToday}</strong></div>
