@@ -1,6 +1,6 @@
 import { AdminAuthGate } from "@/components/AdminAuthGate";
 
-const buckets = ["series-covers", "series-heroes", "episode-thumbnails", "hero-slides"];
+const buckets = ["series-covers", "series-heroes", "episode-thumbnails", "hero-slides", "episode-videos"];
 
 export default function AdminMediaPage() {
   return (
@@ -17,7 +17,7 @@ export default function AdminMediaPage() {
         <div className="admin-bucket-grid">
           {buckets.map((bucket) => <div key={bucket}>{bucket}</div>)}
         </div>
-        <p className="admin-note">支持 jpg / jpeg / png / webp，单张图片 10MB 以内。视频暂不上传，只在剧集里填写视频地址。</p>
+        <p className="admin-note">图片支持 jpg / jpeg / png / webp，单张 10MB 以内。剧集视频现在支持在后台直接上传；未配置 Supabase 时会先保存到本地 public/uploads/videos。</p>
       </section>
     </AdminAuthGate>
   );

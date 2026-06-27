@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminImageField } from "@/components/AdminImageField";
+import { AdminVideoField } from "@/components/AdminVideoField";
 import { useToast } from "@/components/ToastProvider";
 import { adminFetch } from "@/lib/admin-api";
 import {
@@ -115,6 +116,10 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
       setError("请选择作品并填写剧集标题。");
       return;
     }
+    if (!payload.previewVideoUrl && !payload.fullVideoUrl) {
+      setError("请至少上传一个视频：试看视频或完整视频。");
+      return;
+    }
     setSaving(true);
     try {
       const method = id ? "PUT" : "POST";
@@ -152,8 +157,8 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
       <label>剧集简介<textarea value={form.descriptionZh || ""} onChange={(event) => handleDescriptionChange(event.target.value)} /></label>
       <label>英文简介（自动跟随中文，可不填）<textarea value={form.descriptionEn || ""} onChange={(event) => { autoDescriptionRef.current = false; update("descriptionEn", event.target.value); }} /></label>
       <AdminImageField label="缩略图（播放列表显示）" value={form.thumbnailUrl || ""} bucket="episode-thumbnails" onChange={(value) => update("thumbnailUrl", value)} />
-      <label>试看视频地址<input value={form.previewVideoUrl || ""} onChange={(event) => update("previewVideoUrl", event.target.value)} placeholder="/videos/xiaoxi-ep01-preview.mp4" /></label>
-      <label>完整视频地址<input value={form.fullVideoUrl || ""} onChange={(event) => update("fullVideoUrl", event.target.value)} placeholder="https://video.example.com/xxx.mp4" /></label>
+      <AdminVideoField label="上传试看视频（可选，给 preview 使用）" value={form.previewVideoUrl || ""} onChange={(value) => update("previewVideoUrl", value)} />
+      <AdminVideoField label="上传完整视频（推荐上传这里）" value={form.fullVideoUrl || ""} onChange={(value) => update("fullVideoUrl", value)} />
       <label>观看权限<select value={form.accessType} onChange={(event) => update("accessType", event.target.value as ManagedEpisode["accessType"])}>
         <option value="free">免费：完整观看</option>
         <option value="preview">试看：试看 60 秒</option>

@@ -75,6 +75,7 @@ supabase/schema.sql
 - `series-heroes`
 - `episode-thumbnails`
 - `hero-slides`
+- `episode-videos`
 
 表单图片上传会进入对应 bucket，并把公开 URL 写入数据库字段。
 
@@ -114,7 +115,15 @@ supabase/schema.sql
 
 ## 视频地址填写
 
-当前不做真实视频上传，只填写视频地址：
+后台“新增剧集”页面支持直接上传视频文件。上传成功后，系统会自动生成视频地址并填入表单。
+
+如果没有配置 Supabase Storage，本地开发时会临时保存到：
+
+```text
+public/uploads/videos
+```
+
+也可以手动填写视频地址：
 
 ```text
 /videos/xiaoxi-ep01-preview.mp4

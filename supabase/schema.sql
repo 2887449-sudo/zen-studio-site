@@ -80,5 +80,6 @@ values
   ('series-covers', 'series-covers', true),
   ('series-heroes', 'series-heroes', true),
   ('episode-thumbnails', 'episode-thumbnails', true),
-  ('hero-slides', 'hero-slides', true)
+  ('hero-slides', 'hero-slides', true),
+  ('episode-videos', 'episode-videos', true)
 on conflict (id) do nothing;
