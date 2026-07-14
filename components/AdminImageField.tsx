@@ -6,11 +6,11 @@ import { adminFetch } from "@/lib/admin-api";
 type AdminImageFieldProps = {
   label: string;
   value: string;
-  bucket: "series-covers" | "series-heroes" | "episode-thumbnails" | "hero-slides";
+  uploadType: "series-cover" | "series-hero" | "episode-thumbnail" | "hero-slide";
   onChange: (value: string) => void;
 };
 
-export function AdminImageField({ label, value, bucket, onChange }: AdminImageFieldProps) {
+export function AdminImageField({ label, value, uploadType, onChange }: AdminImageFieldProps) {
   const [preview, setPreview] = useState(value);
   const [message, setMessage] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -27,17 +27,17 @@ export function AdminImageField({ label, value, bucket, onChange }: AdminImageFi
     const localPreview = URL.createObjectURL(file);
     setPreview(localPreview);
     const formData = new FormData();
-    formData.set("bucket", bucket);
+    formData.set("type", uploadType);
     formData.set("file", file);
     try {
       setUploading(true);
-      const result = await adminFetch<{ publicUrl: string }>("/api/admin/upload", {
+      const result = await adminFetch<{ mode: "supabase" | "local"; publicUrl: string; message?: string }>("/api/admin/upload", {
         method: "POST",
         body: formData
       });
       onChange(result.publicUrl);
       setPreview(result.publicUrl);
-      setMessage("上传成功。");
+      setMessage(result.mode === "supabase" ? "已上传到 Supabase Storage。" : result.message || "已保存到本地模式。");
     } catch (error) {
       setMessage(error instanceof Error ? `${error.message} 可继续手动填写 URL。` : "上传失败，可继续手动填写 URL。");
     } finally {

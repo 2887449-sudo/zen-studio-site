@@ -1,8 +1,8 @@
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { NextResponse } from "next/server";
-import { isAdminRequest, unauthorizedResponse } from "@/lib/db/auth";
-import { getSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isAdminRequest, unauthorizedResponse } from "@/lib/admin-auth";
+import { getSupabaseAdminState } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
@@ -38,16 +38,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "仅支持 500MB 以内的 mp4 / webm / mov / mkv 视频。" }, { status: 400 });
     }
 
-    const supabase = getSupabaseAdminClient();
-    if (supabase) {
+    const state = getSupabaseAdminState();
+    if (state.mode === "error") return NextResponse.json({ error: state.error }, { status: 500 });
+    if (state.mode === "supabase") {
       const fileName = safeName(file.name);
-      const { error } = await supabase.storage.from(VIDEO_BUCKET).upload(fileName, file, {
+      const { error } = await state.client.storage.from(VIDEO_BUCKET).upload(fileName, file, {
         cacheControl: "3600",
         upsert: false,
         contentType: file.type
       });
       if (error) throw error;
-      const { data } = supabase.storage.from(VIDEO_BUCKET).getPublicUrl(fileName);
+      const { data } = state.client.storage.from(VIDEO_BUCKET).getPublicUrl(fileName);
       return NextResponse.json({ mode: "supabase", publicUrl: data.publicUrl });
     }
 

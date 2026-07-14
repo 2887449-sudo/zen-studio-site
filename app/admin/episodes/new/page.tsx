@@ -8,7 +8,7 @@ export default function NewEpisodePage() {
         <div>
           <p className="eyebrow">NEW EPISODE</p>
           <h1>新增剧集</h1>
-          <p>视频只填写地址，暂不做上传。</p>
+          <p>可以上传缩略图和视频，也可以直接填写已有视频地址。</p>
         </div>
       </div>
       <section className="admin-panel">

@@ -70,12 +70,10 @@ export default function AdminHeroPage() {
         upsertManagedHeroSlide(form);
       }
       setForm({ ...emptyHero, id: createLocalId("hero") });
-      setMessage("Hero 已保存。");
+      setMessage(mode === "supabase" ? "已保存到 Supabase。" : "已保存到本地模式，数据不会同步线上。");
       await refresh();
     } catch (error) {
-      upsertManagedHeroSlide(form);
-      setMessage(error instanceof Error ? `${error.message} 已保存到本地模式。` : "已保存到本地模式。");
-      await refresh();
+      setMessage(error instanceof Error ? `保存失败：${error.message}` : "保存失败。");
     }
   }
 
@@ -110,7 +108,7 @@ export default function AdminHeroPage() {
           <label>英文标签<input value={form.badgeEn || ""} onChange={(event) => update("badgeEn", event.target.value)} /></label>
           <label>中文更新信息<input value={form.episodeInfoZh || ""} onChange={(event) => update("episodeInfoZh", event.target.value)} /></label>
           <label>英文更新信息<input value={form.episodeInfoEn || ""} onChange={(event) => update("episodeInfoEn", event.target.value)} /></label>
-          <AdminImageField label="Hero 图片" value={form.imageUrl || ""} bucket="hero-slides" onChange={(value) => update("imageUrl", value)} />
+          <AdminImageField label="Hero 图片" value={form.imageUrl || ""} uploadType="hero-slide" onChange={(value) => update("imageUrl", value)} />
           <label>跳转作品 slug<input value={form.seriesSlug || ""} onChange={(event) => update("seriesSlug", event.target.value)} /></label>
           <label>排序<input type="number" value={form.sortOrder} onChange={(event) => update("sortOrder", Number(event.target.value))} /></label>
           <label className="admin-check"><input type="checkbox" checked={form.isActive} onChange={(event) => update("isActive", event.target.checked)} /> 启用</label>

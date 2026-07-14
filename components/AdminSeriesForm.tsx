@@ -178,18 +178,18 @@ export function AdminSeriesForm({ id }: AdminSeriesFormProps) {
         method,
         body: JSON.stringify(payload)
       });
-      if (result.item) {
+      if (result.mode === "supabase" && result.item) {
         upsertManagedSeries(result.item);
         setForm(result.item);
-      } else {
+      } else if (result.mode === "local") {
         upsertManagedSeries(payload);
       }
-      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : "作品已保存。");
+      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : "已保存到 Supabase。");
       if (!id) router.push("/admin/series");
     } catch (saveError) {
-      upsertManagedSeries(payload);
-      showToast("Supabase 未配置或保存失败，已保存到本地模式。");
-      setError(saveError instanceof Error ? saveError.message : "保存失败");
+      const message = saveError instanceof Error ? saveError.message : "保存失败";
+      showToast(`保存失败：${message}`);
+      setError(message);
     } finally {
       setSaving(false);
     }
@@ -204,8 +204,8 @@ export function AdminSeriesForm({ id }: AdminSeriesFormProps) {
       <label>英文简介（自动跟随中文，可不填）<textarea value={form.descriptionEn || ""} onChange={(event) => { autoDescriptionRef.current = false; update("descriptionEn", event.target.value); }} /></label>
       <label>分类<input value={categoryZh} onChange={(event) => handleCategoryChange(event.target.value)} placeholder="校园、搞笑、日常" /></label>
       <label>英文分类（自动识别，可不填）<input value={categoryEn} onChange={(event) => { autoCategoryRef.current = false; setCategoryEn(event.target.value); }} placeholder="School, Comedy, Slice of Life" /></label>
-      <AdminImageField label="封面图（作品卡片显示）" value={form.coverUrl || ""} bucket="series-covers" onChange={(value) => update("coverUrl", value)} />
-      <AdminImageField label="Hero 图（详情页/推荐位大图）" value={form.heroImageUrl || ""} bucket="series-heroes" onChange={(value) => update("heroImageUrl", value)} />
+      <AdminImageField label="封面图（作品卡片显示）" value={form.coverUrl || ""} uploadType="series-cover" onChange={(value) => update("coverUrl", value)} />
+      <AdminImageField label="Hero 图（详情页/推荐位大图）" value={form.heroImageUrl || ""} uploadType="series-hero" onChange={(value) => update("heroImageUrl", value)} />
       <label>角标<input value={form.badge || ""} onChange={(event) => update("badge", event.target.value)} placeholder="例如：HOT、独家、VIP、更新中" /><small>显示在封面上的小标签。</small></label>
       <label>剧集数量<input type="number" min="0" value={form.episodeCount} onChange={(event) => update("episodeCount", Number(event.target.value))} /></label>
       <label>排序<input type="number" value={form.sortOrder} onChange={(event) => update("sortOrder", Number(event.target.value))} /><small>数字越小越靠前。</small></label>

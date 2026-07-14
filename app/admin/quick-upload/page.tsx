@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AdminAuthGate } from "@/components/AdminAuthGate";
 import { adminFetch } from "@/lib/admin-api";
@@ -13,6 +13,7 @@ import {
   type ManagedEpisode,
   type ManagedSeries
 } from "@/lib/content-storage";
+import type { ApiItemResponse, ApiListResponse } from "@/lib/cms-types";
 
 const NEW_SERIES = "__new_series__";
 const CATEGORY_TAGS = ["校园", "搞笑", "日常", "家庭", "成长", "仙侠", "玄幻", "热血", "冒险", "都市", "悬疑", "科幻", "少女", "治愈"];
@@ -47,15 +48,15 @@ function suggestCategories(value: string) {
   return "";
 }
 
-function getNextEpisodeNumber(seriesId: string) {
-  const episodes = getManagedEpisodes().filter((episode) => episode.seriesId === seriesId);
+function getNextEpisodeNumber(seriesId: string, episodeItems: ManagedEpisode[]) {
+  const episodes = episodeItems.filter((episode) => episode.seriesId === seriesId);
   if (!episodes.length) return 1;
   return Math.max(...episodes.map((episode) => Number(episode.episodeNumber) || 0)) + 1;
 }
 
 async function uploadImageFile(file: File) {
   const formData = new FormData();
-  formData.set("bucket", "series-covers");
+  formData.set("type", "series-cover");
   formData.set("file", file);
   return adminFetch<{ publicUrl: string; message?: string }>("/api/admin/upload", {
     method: "POST",
@@ -65,6 +66,8 @@ async function uploadImageFile(file: File) {
 
 export default function QuickUploadPage() {
   const [seriesItems, setSeriesItems] = useState<ManagedSeries[]>(() => getManagedSeries());
+  const [episodeItems, setEpisodeItems] = useState<ManagedEpisode[]>(() => getManagedEpisodes());
+  const [mode, setMode] = useState<"supabase" | "local">("local");
   const [selectedSeriesId, setSelectedSeriesId] = useState(NEW_SERIES);
   const [title, setTitle] = useState("");
   const [categoryInput, setCategoryInput] = useState("");
@@ -84,15 +87,32 @@ export default function QuickUploadPage() {
     [selectedSeriesId, seriesItems]
   );
   const selectedCategories = splitCategories(categoryInput);
-  const nextEpisodeNumber = selectedSeries ? getNextEpisodeNumber(selectedSeries.id) : 1;
+  const nextEpisodeNumber = selectedSeries ? getNextEpisodeNumber(selectedSeries.id, episodeItems) : 1;
   const effectiveSeriesCoverUrl = seriesCoverUrl || selectedSeries?.coverUrl || "";
   const effectiveEpisodeCoverUrl = episodeCoverUrl || effectiveSeriesCoverUrl;
 
-  function refreshSeries(nextSelectedId?: string) {
-    const nextItems = getManagedSeries();
-    setSeriesItems(nextItems);
+  async function refreshContent(nextSelectedId?: string) {
+    const localSeries = getManagedSeries();
+    const localEpisodes = getManagedEpisodes();
+    setSeriesItems(localSeries);
+    setEpisodeItems(localEpisodes);
+    try {
+      const [seriesResult, episodeResult] = await Promise.all([
+        adminFetch<ApiListResponse<ManagedSeries>>("/api/admin/series"),
+        adminFetch<ApiListResponse<ManagedEpisode>>("/api/admin/episodes")
+      ]);
+      setMode(seriesResult.mode);
+      if (seriesResult.mode === "supabase") setSeriesItems(seriesResult.items);
+      if (episodeResult.mode === "supabase") setEpisodeItems(episodeResult.items);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "读取云端内容失败。");
+    }
     if (nextSelectedId) setSelectedSeriesId(nextSelectedId);
   }
+
+  useEffect(() => {
+    void refreshContent();
+  }, []);
 
   function handleTitleChange(value: string) {
     setTitle(value);
@@ -173,7 +193,7 @@ export default function QuickUploadPage() {
     }
   }
 
-  function replaceSeriesCoverOnly() {
+  async function replaceSeriesCoverOnly() {
     if (!selectedSeries) {
       setMessage("请先选择一个已有作品，再替换总封面。");
       return;
@@ -194,13 +214,21 @@ export default function QuickUploadPage() {
       heroImageUrl: seriesCoverUrl,
       status: "published"
     };
-    upsertManagedSeries(updatedSeries);
-    refreshSeries(updatedSeries.id);
-    setSeriesCoverUrl("");
-    setMessage(`《${updatedSeries.titleZh}》的作品总封面已替换，不会新增剧集。`);
+    try {
+      if (mode === "supabase") {
+        await adminFetch(`/api/admin/series/${updatedSeries.id}`, { method: "PUT", body: JSON.stringify(updatedSeries) });
+      } else {
+        upsertManagedSeries(updatedSeries);
+      }
+      await refreshContent(updatedSeries.id);
+      setSeriesCoverUrl("");
+      setMessage(mode === "supabase" ? "作品总封面已保存到 Supabase。" : `《${updatedSeries.titleZh}》的作品总封面已保存到本地模式。`);
+    } catch (error) {
+      setMessage(error instanceof Error ? `保存失败：${error.message}` : "保存失败。");
+    }
   }
 
-  function save(event: FormEvent<HTMLFormElement>) {
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!title.trim()) {
       setMessage("先填写作品名，或选择一个已有作品。");
@@ -220,7 +248,7 @@ export default function QuickUploadPage() {
     const isNewSeries = !selectedSeries;
     const seriesId = selectedSeries?.id || createLocalId("series");
     const slug = selectedSeries?.slug || slugify(title);
-    const episodeNumber = selectedSeries ? getNextEpisodeNumber(seriesId) : 1;
+    const episodeNumber = selectedSeries ? getNextEpisodeNumber(seriesId, episodeItems) : 1;
     const series: ManagedSeries = {
       ...(selectedSeries || {
         id: seriesId,
@@ -266,16 +294,36 @@ export default function QuickUploadPage() {
       sortOrder: episodeNumber
     };
 
-    upsertManagedSeries(series);
-    upsertManagedEpisode(episode);
-    refreshSeries(seriesId);
-    setVideoUrl("");
-    setVideoPreview("");
-    setEpisodeCoverUrl("");
-    setEpisodeCoverPreview("");
-    setEpisodeTitle("");
-    setSaving(false);
-    setMessage(isNewSeries ? "保存好了。新作品和第 1 话已发布。" : `保存好了。这个视频已加入《${series.titleZh}》第 ${episodeNumber} 话。`);
+    try {
+      let savedSeries = series;
+      if (mode === "supabase") {
+        const seriesResult = await adminFetch<ApiItemResponse<ManagedSeries>>(
+          isNewSeries ? "/api/admin/series" : `/api/admin/series/${series.id}`,
+          { method: isNewSeries ? "POST" : "PUT", body: JSON.stringify(series) }
+        );
+        if (!seriesResult.item) throw new Error("Supabase 未返回作品数据。");
+        savedSeries = seriesResult.item;
+        episode.seriesId = savedSeries.id;
+        await adminFetch<ApiItemResponse<ManagedEpisode>>("/api/admin/episodes", {
+          method: "POST",
+          body: JSON.stringify(episode)
+        });
+      } else {
+        upsertManagedSeries(series);
+        upsertManagedEpisode(episode);
+      }
+      await refreshContent(savedSeries.id);
+      setVideoUrl("");
+      setVideoPreview("");
+      setEpisodeCoverUrl("");
+      setEpisodeCoverPreview("");
+      setEpisodeTitle("");
+      setMessage(mode === "supabase" ? "作品和剧集已保存到 Supabase。" : isNewSeries ? "已保存到本地模式。新作品和第 1 话已发布。" : `已保存到本地模式，并加入《${series.titleZh}》第 ${episodeNumber} 话。`);
+    } catch (error) {
+      setMessage(error instanceof Error ? `保存失败：${error.message}` : "保存失败。");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

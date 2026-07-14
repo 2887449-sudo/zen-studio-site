@@ -2109,6 +2109,16 @@ button.btn {
   margin-bottom: 24px;
 }
 
+.admin-mode-banner {
+  margin: 12px 0 22px;
+  padding: 10px 14px;
+  border: 1px solid rgba(17, 17, 17, 0.16);
+  background: rgba(255, 255, 255, 0.72);
+  color: #111;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .admin-nav a {
   border: 1px solid var(--line);
   border-radius: 999px;

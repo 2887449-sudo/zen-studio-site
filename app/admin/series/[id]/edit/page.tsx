@@ -9,7 +9,7 @@ export default async function EditSeriesPage({ params }: { params: Promise<{ id:
         <div>
           <p className="eyebrow">EDIT SERIES</p>
           <h1>编辑作品</h1>
-          <p>修改后保存到当前浏览器的 localStorage。</p>
+          <p>修改后保存到当前模式；云端配置完整时会写入 Supabase。</p>
         </div>
       </div>
       <section className="admin-panel">

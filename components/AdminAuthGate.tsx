@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { FormEvent, ReactNode, useEffect, useState } from "react";
 import { LockKeyhole } from "lucide-react";
+import { ADMIN_PASSWORD_STORAGE_KEY } from "@/lib/content-storage";
+import { adminFetch } from "@/lib/admin-api";
 
 const SESSION_KEY = "zen_admin_authed";
 
@@ -15,11 +17,39 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [modeMessage, setModeMessage] = useState("正在检查保存模式...");
 
   useEffect(() => {
-    setAuthed(window.sessionStorage.getItem(SESSION_KEY) === "true");
+    const hasSession = window.sessionStorage.getItem(SESSION_KEY) === "true";
+    const hasPassword = Boolean(window.sessionStorage.getItem(ADMIN_PASSWORD_STORAGE_KEY));
+    setAuthed(hasSession && hasPassword);
+    if (hasSession && !hasPassword) window.sessionStorage.removeItem(SESSION_KEY);
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    if (!authed) return;
+    void adminFetch<{
+      hasSupabaseUrl: boolean;
+      hasAnonKey: boolean;
+      hasServiceRoleKey: boolean;
+    }>("/api/admin/health")
+      .then((health) => {
+        const cloudReady = health.hasSupabaseUrl && health.hasAnonKey && health.hasServiceRoleKey;
+        const localMode = !health.hasSupabaseUrl && !health.hasAnonKey && !health.hasServiceRoleKey;
+        if (cloudReady) setModeMessage("Supabase 云端模式");
+        else if (localMode) setModeMessage("本地模拟模式");
+        else {
+          const missing = [
+            !health.hasSupabaseUrl ? "Supabase URL" : "",
+            !health.hasAnonKey ? "Anon Key" : "",
+            !health.hasServiceRoleKey ? "Service Role Key" : ""
+          ].filter(Boolean).join("、");
+          setModeMessage(`Supabase 配置不完整：缺少 ${missing}`);
+        }
+      })
+      .catch((healthError) => setModeMessage(healthError instanceof Error ? healthError.message : "无法检查保存模式"));
+  }, [authed]);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,7 +62,8 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
     const data = await response.json() as { ok?: boolean };
     if (data.ok) {
       window.sessionStorage.setItem(SESSION_KEY, "true");
-      window.sessionStorage.setItem("zen_admin_token", password);
+      window.sessionStorage.setItem(ADMIN_PASSWORD_STORAGE_KEY, password);
+      window.sessionStorage.removeItem("zen_admin_token");
       setAuthed(true);
       return;
     }
@@ -69,6 +100,7 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
           <Link href="/admin/media">素材管理</Link>
           <Link href="/admin/settings">网站设置</Link>
         </nav>
+        <div className="admin-mode-banner">当前模式：{modeMessage}</div>
         {children}
       </section>
     </main>

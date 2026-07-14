@@ -128,18 +128,18 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
         method,
         body: JSON.stringify(payload)
       });
-      if (result.item) {
+      if (result.mode === "supabase" && result.item) {
         upsertManagedEpisode(result.item);
         setForm(result.item);
-      } else {
+      } else if (result.mode === "local") {
         upsertManagedEpisode(payload);
       }
-      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : "剧集已保存。");
+      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : "已保存到 Supabase。");
       if (!id) router.push("/admin/episodes");
     } catch (saveError) {
-      upsertManagedEpisode(payload);
-      showToast("Supabase 未配置或保存失败，已保存到本地模式。");
-      setError(saveError instanceof Error ? saveError.message : "保存失败");
+      const message = saveError instanceof Error ? saveError.message : "保存失败";
+      showToast(`保存失败：${message}`);
+      setError(message);
     } finally {
       setSaving(false);
     }
@@ -156,7 +156,7 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
       <label>第几话<input type="number" min="1" value={form.episodeNumber} onChange={(event) => update("episodeNumber", Number(event.target.value))} /></label>
       <label>剧集简介<textarea value={form.descriptionZh || ""} onChange={(event) => handleDescriptionChange(event.target.value)} /></label>
       <label>英文简介（自动跟随中文，可不填）<textarea value={form.descriptionEn || ""} onChange={(event) => { autoDescriptionRef.current = false; update("descriptionEn", event.target.value); }} /></label>
-      <AdminImageField label="缩略图（播放列表显示）" value={form.thumbnailUrl || ""} bucket="episode-thumbnails" onChange={(value) => update("thumbnailUrl", value)} />
+      <AdminImageField label="缩略图（播放列表显示）" value={form.thumbnailUrl || ""} uploadType="episode-thumbnail" onChange={(value) => update("thumbnailUrl", value)} />
       <AdminVideoField label="上传试看视频（可选，给 preview 使用）" value={form.previewVideoUrl || ""} onChange={(value) => update("previewVideoUrl", value)} />
       <AdminVideoField label="上传完整视频（推荐上传这里）" value={form.fullVideoUrl || ""} onChange={(value) => update("fullVideoUrl", value)} />
       <label>观看权限<select value={form.accessType} onChange={(event) => update("accessType", event.target.value as ManagedEpisode["accessType"])}>

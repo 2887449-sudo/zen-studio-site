@@ -17,6 +17,7 @@ export type ManagedHeroSlide = CmsHeroSlide;
 export const SERIES_STORAGE_KEY = "zen_admin_series";
 export const EPISODES_STORAGE_KEY = "zen_admin_episodes";
 export const HERO_STORAGE_KEY = "zen_admin_hero_slides";
+export const ADMIN_PASSWORD_STORAGE_KEY = "zen-admin-password";
 
 function canUseStorage() {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -47,9 +48,9 @@ export function createLocalId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export function getAdminToken() {
+export function getAdminPassword() {
   if (typeof window === "undefined") return "";
-  return window.sessionStorage.getItem("zen_admin_token") || "";
+  return window.sessionStorage.getItem(ADMIN_PASSWORD_STORAGE_KEY) || "";
 }
 
 export function getManagedSeries() {
