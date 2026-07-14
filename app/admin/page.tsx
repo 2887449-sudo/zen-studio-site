@@ -77,6 +77,7 @@ export default function AdminPage() {
           <p>当前使用 localStorage + console 记录事件；未来接入 Supabase 时可平滑迁移。</p>
         </div>
         <div className="admin-head-actions">
+          <Link href="/admin/quick-upload" className="btn primary">快捷上传</Link>
           <Link href="/admin/series/new" className="btn primary">上传作品</Link>
           <button type="button" className="btn dark-outline" onClick={() => setEvents(getStoredAnalyticsEvents())}>刷新数据</button>
         </div>

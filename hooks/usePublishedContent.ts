@@ -25,11 +25,11 @@ export function usePublishedContent(): PublishedContent {
       try {
         const response = await fetch("/api/content", { cache: "no-store" });
         const data = await response.json() as { mode: "supabase" | "local"; series: ManagedSeries[]; episodes: ManagedEpisode[]; heroSlides: ManagedHeroSlide[] };
-        if (data.mode === "supabase" && (data.series.length || data.episodes.length || data.heroSlides.length)) {
+        if (data.mode === "supabase") {
           setContent({
             mode: "supabase",
-            series: data.series.length ? data.series.map(cmsSeriesToSeries) : mockSeriesList,
-            episodes: data.episodes.length ? data.episodes.map(cmsEpisodeToEpisode) : mockEpisodes,
+            series: data.series.map(cmsSeriesToSeries),
+            episodes: data.episodes.map(cmsEpisodeToEpisode),
             heroSlides: data.heroSlides
           });
         }

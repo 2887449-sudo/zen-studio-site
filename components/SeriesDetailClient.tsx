@@ -31,14 +31,20 @@ export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
   }
 
   const episodes = content.episodes.filter((episode) => episode.seriesId === series.id);
+  const firstEpisode = [...episodes].sort((a, b) => a.episodeNumber - b.episodeNumber)[0];
   const title = getSeriesTitle(series, locale);
   const categories = getSeriesCategories(series, locale);
+  const hasUploadedCover = series.cover.startsWith("/uploads/") || series.cover.startsWith("http");
 
   return (
     <main className="page detail-page">
       <section className={`detail-hero detail-poster-bg poster-${series.slug}`}>
         <div className="container detail-hero-inner">
-          <div className="detail-poster poster-art">
+          <div className={`detail-poster poster-art ${hasUploadedCover ? "uploaded-poster-art" : ""}`}>
+            {series.cover ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="poster-upload-image" src={series.cover} alt={title} />
+            ) : null}
             <div className="poster-grid-lines" />
             <div className="poster-character" />
             <div className="poster-film-strip" />
@@ -56,7 +62,7 @@ export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
               <span>{series.isVip ? "VIP" : locale === "zh" ? "免费试看" : "Free preview"}</span>
             </div>
             <div className="hero-actions">
-              <Link href={series.status === "upcoming" ? "/series" : `/watch/${series.slug}-ep-1`} className="btn primary" onClick={() => trackEvent("episode_play_click", { source: "series_detail_start", seriesId: series.id, slug: series.slug, title })}><Play size={16} fill="currentColor" />{locale === "zh" ? "开始观看" : "Start Watching"}</Link>
+              <Link href={series.status === "upcoming" || !firstEpisode ? "/series" : `/watch/${firstEpisode.id}`} className="btn primary" onClick={() => trackEvent("episode_play_click", { source: "series_detail_start", seriesId: series.id, slug: series.slug, title, episodeId: firstEpisode?.id || null })}><Play size={16} fill="currentColor" />{locale === "zh" ? "开始观看" : "Start Watching"}</Link>
               <button type="button" className="btn dark-outline" onClick={() => trackEvent("favorite_click", { seriesId: series.id, slug: series.slug, title })}><Heart size={16} />{locale === "zh" ? "收藏" : "Save"}</button>
             </div>
             <p className="small-meta">{formatNumber(series.views, locale)} {locale === "zh" ? "播放" : "views"} / {formatNumber(series.followers, locale)} {locale === "zh" ? "追更" : "followers"}</p>

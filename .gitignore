@@ -14,5 +14,6 @@ pnpm-debug.log*
 dev.out.log
 dev.err.log
 dev-*.log
+public/uploads/
 .vercel/
 .DS_Store

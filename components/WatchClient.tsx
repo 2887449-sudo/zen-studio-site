@@ -21,7 +21,7 @@ function resolveEpisode(rawId: string, episodes: ReturnType<typeof usePublishedC
   if (!parts) return undefined;
   const series = seriesList.find((item) => item.slug === parts[1]);
   if (!series) return undefined;
-  return episodes.find((episode) => episode.id === `${series.slug}-ep-${parts[2]}`);
+  return episodes.find((episode) => episode.seriesId === series.id && episode.episodeNumber === Number(parts[2]));
 }
 
 export function WatchClient({ episodeId }: WatchClientProps) {
@@ -62,9 +62,13 @@ export function WatchClient({ episodeId }: WatchClientProps) {
   const access = getEpisodeAccess(episode);
   const locked = access === "vip";
   const title = `${locale === "zh" ? series.titleZh : series.titleEn} ${locale === "zh" ? episode.titleZh : episode.titleEn}`;
-  const prevEpisode = episode.episodeNumber > 1 ? `${series.slug}-ep-${episode.episodeNumber - 1}` : `${series.slug}-ep-1`;
-  const nextEpisode = `${series.slug}-ep-${Math.min(series.episodeCount, episode.episodeNumber + 1)}`;
-  const episodeList = content.episodes.filter((item) => item.seriesId === series.id).slice(0, 8);
+  const seriesEpisodes = content.episodes
+    .filter((item) => item.seriesId === series.id)
+    .sort((a, b) => a.episodeNumber - b.episodeNumber);
+  const currentIndex = seriesEpisodes.findIndex((item) => item.id === episode.id);
+  const prevEpisode = seriesEpisodes[Math.max(0, currentIndex - 1)]?.id || episode.id;
+  const nextEpisode = seriesEpisodes[Math.min(seriesEpisodes.length - 1, currentIndex + 1)]?.id || episode.id;
+  const episodeList = seriesEpisodes.slice(0, 8);
 
   return (
     <main className="page watch-page">

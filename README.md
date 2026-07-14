@@ -67,6 +67,8 @@ supabase/schema.sql
 - `hero_slides`
 - `analytics_events`
 
+脚本还会开启数据访问保护：访客只能读取已发布作品、已发布剧集和已启用 Hero；后台新增、编辑、删除操作由仅服务端使用的 `SUPABASE_SERVICE_ROLE_KEY` 完成。
+
 ## 创建 Storage Bucket
 
 需要创建并设为 public 的 bucket：
@@ -75,9 +77,30 @@ supabase/schema.sql
 - `series-heroes`
 - `episode-thumbnails`
 - `hero-slides`
+
+图片规则：
+
+- 支持 jpg / jpeg / png / webp
+- 单张最大 10MB
+- 后台上传成功后自动把公开 URL 写入作品、剧集或 Hero 数据
+
+项目目前还支持直接上传剧集视频，因此如需使用视频上传功能，再创建并设为 public：
+
 - `episode-videos`
 
 表单图片上传会进入对应 bucket，并把公开 URL 写入数据库字段。
+
+## 前台读取顺序
+
+1. 配置 Supabase 后，优先读取云端已发布数据
+2. 云端读取失败或未配置 Supabase 时，使用本地后台数据；本地也没有数据时使用 `lib/mock-data.ts`
+3. 首页 Hero 读取已启用的 `hero_slides`
+4. 首页精选读取 `series` 中 `is_featured=true` 且 `status=published` 的作品
+5. 漫剧库只读取 `status=published` 的作品
+6. 详情页按 slug 读取作品，并按 `series_id` 读取已发布剧集
+7. 播放页按剧集 id 读取数据，并根据 `access_type` 判断 free / preview / vip
+
+Supabase 未配置、网络中断或表为空都不会导致页面报错。
 
 ## 新增作品
 

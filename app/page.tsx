@@ -14,8 +14,12 @@ import { usePublishedContent } from "@/hooks/usePublishedContent";
 
 export default function Home() {
   const { locale, copy } = useLanguage();
-  const { series } = usePublishedContent();
-  const featuredSeries = series.filter((item) => item.status === "live").slice(0, 4);
+  const { series, mode } = usePublishedContent();
+  const locallyFeatured = series.filter((item) => item.status === "live" && item.isFeatured);
+  const featuredSeries = (mode === "supabase"
+    ? locallyFeatured
+    : locallyFeatured.length ? locallyFeatured : series.filter((item) => item.status === "live")
+  ).slice(0, 4);
 
   return (
     <main className="page">

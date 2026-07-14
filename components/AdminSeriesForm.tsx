@@ -28,7 +28,7 @@ const emptySeries: ManagedSeries = {
   badge: "HOT",
   isVip: false,
   isFeatured: false,
-  status: "draft",
+  status: "published",
   episodeCount: 1,
   views: 0,
   followers: 0,

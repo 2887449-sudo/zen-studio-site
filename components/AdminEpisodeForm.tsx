@@ -31,7 +31,7 @@ const emptyEpisode: ManagedEpisode = {
   accessType: "free",
   duration: "",
   releaseDate: "",
-  status: "draft",
+  status: "published",
   sortOrder: 0
 };
 

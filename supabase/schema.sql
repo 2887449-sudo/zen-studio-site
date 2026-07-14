@@ -75,6 +75,44 @@ create index if not exists episodes_series_id_idx on episodes(series_id);
 create index if not exists episodes_status_idx on episodes(status);
 create index if not exists hero_slides_active_idx on hero_slides(is_active);
 
+-- Public visitors can only read published content. Admin API routes use the
+-- service role key, which bypasses RLS for CMS create/update/delete actions.
+alter table series enable row level security;
+alter table episodes enable row level security;
+alter table hero_slides enable row level security;
+alter table analytics_events enable row level security;
+
+drop policy if exists "Public can read published series" on series;
+create policy "Public can read published series"
+on series for select
+to anon, authenticated
+using (status = 'published');
+
+drop policy if exists "Public can read published episodes" on episodes;
+create policy "Public can read published episodes"
+on episodes for select
+to anon, authenticated
+using (
+  status = 'published'
+  and exists (
+    select 1 from series
+    where series.id = episodes.series_id
+      and series.status = 'published'
+  )
+);
+
+drop policy if exists "Public can read active hero slides" on hero_slides;
+create policy "Public can read active hero slides"
+on hero_slides for select
+to anon, authenticated
+using (is_active = true);
+
+drop policy if exists "Public can submit analytics events" on analytics_events;
+create policy "Public can submit analytics events"
+on analytics_events for insert
+to anon, authenticated
+with check (true);
+
 insert into storage.buckets (id, name, public)
 values
   ('series-covers', 'series-covers', true),

@@ -21,6 +21,7 @@ export type Series = {
   followers: number;
   updatedAt: string;
   status: SeriesStatus;
+  isFeatured?: boolean;
 };
 
 export type Episode = {

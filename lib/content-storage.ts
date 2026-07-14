@@ -118,7 +118,8 @@ export function cmsSeriesToSeries(item: ManagedSeries): Series {
     views: Number(item.views) || 0,
     followers: Number(item.followers) || 0,
     updatedAt: item.updatedAt || new Date().toISOString().slice(0, 10),
-    status: (item.status === "published" ? "live" : "upcoming") as SeriesStatus
+    status: (item.status === "published" ? "live" : "upcoming") as SeriesStatus,
+    isFeatured: Boolean(item.isFeatured)
   };
 }
 
@@ -130,7 +131,9 @@ export function cmsEpisodeToEpisode(item: ManagedEpisode): Episode {
     titleEn: item.titleEn || item.titleZh,
     episodeNumber: Number(item.episodeNumber) || 1,
     thumbnail: item.thumbnailUrl || "/images/covers/youth.svg",
-    videoUrl: item.accessType === "free" ? item.fullVideoUrl : item.previewVideoUrl,
+    videoUrl: item.accessType === "preview"
+      ? item.previewVideoUrl || item.fullVideoUrl
+      : item.fullVideoUrl || item.previewVideoUrl,
     isVip: item.accessType === "vip",
     isFree: item.accessType === "free",
     accessType: item.accessType,

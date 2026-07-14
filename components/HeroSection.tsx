@@ -24,10 +24,14 @@ type HeroSlide = {
   categoryEn: string;
 };
 
+function cleanTitle(value: string) {
+  return value.replace("小汐的校园显眼包日记", "小汐的日记");
+}
+
 const defaultHeroSlides: HeroSlide[] = [
   {
-    titleZh: "小汐的校园显眼包日记",
-    titleEn: "Xiaoxi's Campus Spotlight Diary",
+    titleZh: "小汐的日记",
+    titleEn: "Xiaoxi's Diary",
     subtitleZh: "古灵精怪的小汐，把校园日常过成爆笑冒险。",
     subtitleEn: "A mischievous school-day comedy where everyday campus life turns into a bright, chaotic adventure.",
     badgeZh: "主推新作",
@@ -109,7 +113,7 @@ export function HeroSection() {
   const activeSlide = heroSlides[activeIndex] ?? heroSlides[0];
   const tags = locale === "zh" ? ["原创漫剧", "会员追更", "高清动态漫画"] : ["Original Series", "Member Updates", "HD Motion Comics"];
   const localized = useMemo(() => ({
-    title: locale === "zh" ? activeSlide.titleZh : activeSlide.titleEn,
+    title: cleanTitle(locale === "zh" ? activeSlide.titleZh : activeSlide.titleEn),
     subtitle: locale === "zh" ? activeSlide.subtitleZh : activeSlide.subtitleEn,
     badge: locale === "zh" ? activeSlide.badgeZh : activeSlide.badgeEn,
     episodeInfo: locale === "zh" ? activeSlide.episodeInfoZh : activeSlide.episodeInfoEn,

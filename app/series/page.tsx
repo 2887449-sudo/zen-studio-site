@@ -9,9 +9,6 @@ import { trackEvent } from "@/lib/analytics-events";
 import { getSeriesCategories, getSeriesTitle } from "@/lib/mock-data";
 import { usePublishedContent } from "@/hooks/usePublishedContent";
 
-const categoriesZh = ["全部", "校园", "悬疑", "科幻", "都市", "少女", "热血"];
-const categoriesEn = ["All", "School", "Mystery", "Sci-Fi", "Urban", "Girlhood", "Action"];
-
 export default function SeriesPage() {
   const { locale } = useLanguage();
   const [query, setQuery] = useState("");
@@ -19,8 +16,16 @@ export default function SeriesPage() {
   const [vipOnly, setVipOnly] = useState(false);
   const [updatingOnly, setUpdatingOnly] = useState(false);
   const { series } = usePublishedContent();
-  const categories = locale === "zh" ? categoriesZh : categoriesEn;
   const allLabel = locale === "zh" ? "全部" : "All";
+  const categories = useMemo(() => {
+    const unique = new Set<string>();
+    series.forEach((item) => {
+      getSeriesCategories(item, locale).forEach((itemCategory) => {
+        if (itemCategory.trim()) unique.add(itemCategory.trim());
+      });
+    });
+    return [allLabel, ...Array.from(unique)];
+  }, [allLabel, locale, series]);
 
   const filtered = useMemo(() => {
     return series.filter((item) => {

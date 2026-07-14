@@ -61,6 +61,7 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
     <main className="admin-page">
       <section className="admin-shell">
         <nav className="admin-nav">
+          <Link href="/admin/quick-upload">快捷上传</Link>
           <Link href="/admin">数据总览</Link>
           <Link href="/admin/series">作品管理</Link>
           <Link href="/admin/episodes">剧集管理</Link>
