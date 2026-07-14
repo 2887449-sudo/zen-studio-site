@@ -100,7 +100,7 @@ export function AdminSeriesForm({ id }: AdminSeriesFormProps) {
   const [categoryEn, setCategoryEn] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [saveInfo, setSaveInfo] = useState("");
+  const [saveInfo, setSaveInfo] = useState<{ coverUrl: boolean; heroImageUrl: boolean } | null>(null);
   const autoTitleRef = useRef(true);
   const autoDescriptionRef = useRef(true);
   const autoCategoryRef = useRef(true);
@@ -160,7 +160,7 @@ export function AdminSeriesForm({ id }: AdminSeriesFormProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setSaveInfo("");
+    setSaveInfo(null);
     const payload = {
       ...form,
       titleEn: form.titleEn || form.titleZh,
@@ -183,13 +183,18 @@ export function AdminSeriesForm({ id }: AdminSeriesFormProps) {
       if (result.mode === "supabase" && result.item) {
         upsertManagedSeries(result.item);
         setForm(result.item);
-        const info = `cover_url = ${result.item.coverUrl || "空"}；hero_image_url = ${result.item.heroImageUrl || "空"}`;
-        setSaveInfo(info);
-        console.info(`[ZEN CMS] 已保存到 Supabase：${info}`);
+        setSaveInfo({
+          coverUrl: Boolean(result.item.coverUrl),
+          heroImageUrl: Boolean(result.item.heroImageUrl)
+        });
+        console.info("[ZEN CMS] 已保存到 Supabase", {
+          cover_url: result.item.coverUrl || "",
+          hero_image_url: result.item.heroImageUrl || ""
+        });
       } else if (result.mode === "local") {
         upsertManagedSeries(payload);
       }
-      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : `已保存到 Supabase：cover_url = ${result.item?.coverUrl || "空"}`);
+      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : "已保存到 Supabase");
       if (!id) router.push("/admin/series");
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : "保存失败";
@@ -222,7 +227,13 @@ export function AdminSeriesForm({ id }: AdminSeriesFormProps) {
       <label className="admin-check"><input type="checkbox" checked={form.isFeatured} onChange={(event) => update("isFeatured", event.target.checked)} /> 首页推荐</label>
       <label className="admin-check"><input type="checkbox" checked={form.isVip} onChange={(event) => update("isVip", event.target.checked)} /> VIP 作品</label>
       {error ? <p className="admin-form-error">{error}</p> : null}
-      {saveInfo ? <p className="admin-save-info">已保存到 Supabase：{saveInfo}</p> : null}
+      {saveInfo ? (
+        <div className="admin-save-info">
+          <strong>已保存到 Supabase</strong>
+          <span>cover_url: {saveInfo.coverUrl ? "有值" : "无值"}</span>
+          <span>hero_image_url: {saveInfo.heroImageUrl ? "有值" : "无值"}</span>
+        </div>
+      ) : null}
       <div className="admin-form-actions">
         <button type="submit" className="btn primary" disabled={saving}>{saving ? "保存中..." : "保存作品"}</button>
         <Link href="/admin/series" className="btn dark-outline">返回列表</Link>

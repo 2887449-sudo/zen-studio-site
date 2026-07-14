@@ -53,7 +53,7 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
   const [form, setForm] = useState<ManagedEpisode>(emptyEpisode);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [saveInfo, setSaveInfo] = useState("");
+  const [saveInfo, setSaveInfo] = useState<{ thumbnailUrl: boolean } | null>(null);
   const autoTitleRef = useRef(true);
   const autoDescriptionRef = useRef(true);
 
@@ -108,7 +108,7 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    setSaveInfo("");
+    setSaveInfo(null);
     const payload = {
       ...form,
       titleEn: form.titleEn || form.titleZh,
@@ -133,13 +133,14 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
       if (result.mode === "supabase" && result.item) {
         upsertManagedEpisode(result.item);
         setForm(result.item);
-        const info = `thumbnail_url = ${result.item.thumbnailUrl || "空"}`;
-        setSaveInfo(info);
-        console.info(`[ZEN CMS] 已保存到 Supabase：${info}`);
+        setSaveInfo({ thumbnailUrl: Boolean(result.item.thumbnailUrl) });
+        console.info("[ZEN CMS] 已保存到 Supabase", {
+          thumbnail_url: result.item.thumbnailUrl || ""
+        });
       } else if (result.mode === "local") {
         upsertManagedEpisode(payload);
       }
-      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : `已保存到 Supabase：thumbnail_url = ${result.item?.thumbnailUrl || "空"}`);
+      showToast(result.mode === "local" ? "已保存到本地模式，数据不会同步线上。" : "已保存到 Supabase");
       if (!id) router.push("/admin/episodes");
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : "保存失败";
@@ -178,7 +179,12 @@ export function AdminEpisodeForm({ id }: AdminEpisodeFormProps) {
         <option value="archived">已归档：下架保留</option>
       </select></label>
       {error ? <p className="admin-form-error">{error}</p> : null}
-      {saveInfo ? <p className="admin-save-info">已保存到 Supabase：{saveInfo}</p> : null}
+      {saveInfo ? (
+        <div className="admin-save-info">
+          <strong>已保存到 Supabase</strong>
+          <span>thumbnail_url: {saveInfo.thumbnailUrl ? "有值" : "无值"}</span>
+        </div>
+      ) : null}
       <div className="admin-form-actions">
         <button type="submit" className="btn primary" disabled={saving}>{saving ? "保存中..." : "保存剧集"}</button>
         <Link href="/admin/episodes" className="btn dark-outline">返回列表</Link>

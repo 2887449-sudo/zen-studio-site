@@ -100,7 +100,9 @@ export function WatchClient({ episodeId }: WatchClientProps) {
               const itemAccess = getEpisodeAccess(item);
               return (
                 <Link href={`/watch/${item.id}`} className={item.id === episode.id ? "active" : ""} key={item.id}>
-                  <span>{locale === "zh" ? `第 ${item.episodeNumber} 话` : `EP ${item.episodeNumber}`}</span>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img className="watch-episode-thumbnail" src={item.thumbnail} alt="" onError={(event) => { event.currentTarget.style.display = "none"; }} />
+                  <span className="watch-episode-label">{locale === "zh" ? `第 ${item.episodeNumber} 话` : `EP ${item.episodeNumber}`}</span>
                   <b>{itemAccess === "free" ? (locale === "zh" ? "免费" : "Free") : itemAccess === "preview" ? (locale === "zh" ? "试看" : "Preview") : "VIP"}</b>
                 </Link>
               );

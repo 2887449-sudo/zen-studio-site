@@ -2277,6 +2277,8 @@ button.btn {
 }
 
 .admin-save-info {
+  display: grid;
+  gap: 4px;
   grid-column: 1 / -1;
   margin: 0;
   padding: 12px 14px;
@@ -2694,12 +2696,25 @@ button.btn {
 }
 
 .watch-episode-panel a {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
   gap: 12px;
   padding: 12px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.75);
+}
+
+.watch-episode-thumbnail {
+  width: 88px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 5px;
+  background: #080808;
+}
+
+.watch-episode-label {
+  min-width: 0;
 }
 
 .watch-episode-panel a.active {
