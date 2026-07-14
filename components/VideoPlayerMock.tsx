@@ -10,9 +10,10 @@ type VideoPlayerMockProps = {
   locale: Locale;
   onPlay?: () => void;
   videoUrl?: string;
+  poster?: string;
 };
 
-export function VideoPlayerMock({ title, access, locale, onPlay, videoUrl }: VideoPlayerMockProps) {
+export function VideoPlayerMock({ title, access, locale, onPlay, videoUrl, poster }: VideoPlayerMockProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const status = access === "free"
@@ -35,6 +36,7 @@ export function VideoPlayerMock({ title, access, locale, onPlay, videoUrl }: Vid
           ref={videoRef}
           className="player-video"
           src={videoUrl}
+          poster={poster}
           controls
           preload="metadata"
           onPlay={() => {
@@ -44,8 +46,11 @@ export function VideoPlayerMock({ title, access, locale, onPlay, videoUrl }: Vid
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}
         />
+      ) : poster ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className="player-poster" src={poster} alt={title} />
       ) : null}
-      {!isPlaying ? (
+      {videoUrl && !isPlaying ? (
         <button type="button" className="player-play" aria-label="Play" onClick={handlePlayClick}>
           <Play size={34} fill="currentColor" />
         </button>

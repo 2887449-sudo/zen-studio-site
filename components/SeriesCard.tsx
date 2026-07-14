@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Eye, Play, UsersRound } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Locale, Series } from "@/lib/mock-data";
@@ -14,11 +15,13 @@ type SeriesCardProps = {
 };
 
 export function SeriesCard({ series, locale, featured = false }: SeriesCardProps) {
+  const [coverFailed, setCoverFailed] = useState(false);
   const title = getSeriesTitle(series, locale);
   const categories = getSeriesCategories(series, locale);
   const isUpcoming = series.status === "upcoming";
   const href = isUpcoming ? "/series" : `/series/${series.slug}`;
-  const hasUploadedCover = series.cover.startsWith("/uploads/") || series.cover.startsWith("http");
+  const hasCover = Boolean(series.cover) && !coverFailed;
+  const hasUploadedCover = hasCover && (series.cover.startsWith("/uploads/") || series.cover.startsWith("http"));
 
   return (
     <motion.article className={`series-card premium-card ${featured ? "featured-card" : ""} ${isUpcoming ? "upcoming-card" : ""}`} whileHover={{ y: -6 }}>
@@ -30,9 +33,9 @@ export function SeriesCard({ series, locale, featured = false }: SeriesCardProps
         source: "series_card"
       })}>
         <div className={`poster-art poster-${series.slug} ${hasUploadedCover ? "uploaded-poster-art" : ""}`}>
-          {series.cover ? (
+          {hasCover ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className="poster-upload-image" src={series.cover} alt={title} />
+            <img className="poster-upload-image" src={series.cover} alt={title} onError={() => setCoverFailed(true)} />
           ) : null}
           <div className="poster-grid-lines" />
           <div className="poster-character" />

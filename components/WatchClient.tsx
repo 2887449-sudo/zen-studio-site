@@ -83,7 +83,7 @@ export function WatchClient({ episodeId }: WatchClientProps) {
                 episodeId: episode.id,
                 episodeNumber: episode.episodeNumber,
                 access
-              })} videoUrl={episode.videoUrl} />
+              })} videoUrl={episode.videoUrl} poster={episode.thumbnail} />
               {locked ? <VipLockOverlay backHref={`/series/${series.slug}`} /> : null}
             </div>
             {access === "preview" ? (

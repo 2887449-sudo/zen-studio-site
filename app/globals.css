@@ -789,7 +789,15 @@ img {
 }
 
 .episode-row {
-  grid-template-columns: 120px 1fr 70px 96px;
+  grid-template-columns: 112px 120px 1fr 70px 96px;
+}
+
+.episode-thumbnail {
+  width: 112px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #151515;
 }
 
 .episode-row span,
@@ -2268,6 +2276,17 @@ button.btn {
   font-weight: 900;
 }
 
+.admin-save-info {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(45, 130, 72, 0.28);
+  background: rgba(45, 130, 72, 0.08);
+  color: #24663a;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
 .admin-bucket-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2381,6 +2400,15 @@ button.btn {
   height: 100%;
   object-fit: cover;
   z-index: 1;
+}
+
+.player-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
 }
 
 .player-video + .player-play {

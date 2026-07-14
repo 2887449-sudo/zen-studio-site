@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Heart, LockKeyhole, Play } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { trackEvent } from "@/lib/analytics-events";
@@ -12,6 +13,7 @@ type SeriesDetailClientProps = {
 };
 
 export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
+  const [detailImageFailed, setDetailImageFailed] = useState(false);
   const { locale } = useLanguage();
   const content = usePublishedContent();
   const series = content.series.find((item) => item.slug === slug);
@@ -34,16 +36,21 @@ export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
   const firstEpisode = [...episodes].sort((a, b) => a.episodeNumber - b.episodeNumber)[0];
   const title = getSeriesTitle(series, locale);
   const categories = getSeriesCategories(series, locale);
-  const hasUploadedCover = series.cover.startsWith("/uploads/") || series.cover.startsWith("http");
+  const detailImage = series.heroImage || series.cover;
+  const hasDetailImage = Boolean(detailImage) && !detailImageFailed;
+  const hasUploadedDetailImage = hasDetailImage && (detailImage.startsWith("/uploads/") || detailImage.startsWith("http"));
 
   return (
     <main className="page detail-page">
-      <section className={`detail-hero detail-poster-bg poster-${series.slug}`}>
+      <section
+        className={`detail-hero detail-poster-bg poster-${series.slug}`}
+        style={hasDetailImage ? { backgroundImage: `url("${detailImage}")`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+      >
         <div className="container detail-hero-inner">
-          <div className={`detail-poster poster-art ${hasUploadedCover ? "uploaded-poster-art" : ""}`}>
-            {series.cover ? (
+          <div className={`detail-poster poster-art ${hasUploadedDetailImage ? "uploaded-poster-art" : ""}`}>
+            {hasDetailImage ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img className="poster-upload-image" src={series.cover} alt={title} />
+              <img className="poster-upload-image" src={detailImage} alt={title} onError={() => setDetailImageFailed(true)} />
             ) : null}
             <div className="poster-grid-lines" />
             <div className="poster-character" />
@@ -83,6 +90,8 @@ export function SeriesDetailClient({ slug }: SeriesDetailClientProps) {
                     : locale === "zh" ? "会员专享" : "Members";
                 return (
                   <Link href={`/watch/${episode.id}`} className="episode-row" key={episode.id} onClick={() => trackEvent("episode_play_click", { source: "series_detail_episode", seriesId: series.id, slug: series.slug, episodeId: episode.id, episodeNumber: episode.episodeNumber, access })}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className="episode-thumbnail" src={episode.thumbnail} alt="" onError={(event) => { event.currentTarget.style.display = "none"; }} />
                     <span>{locale === "zh" ? `第 ${episode.episodeNumber} 话` : `Episode ${episode.episodeNumber}`}</span>
                     <strong>{locale === "zh" ? episode.titleZh : episode.titleEn}</strong>
                     <em>{episode.duration}</em>
