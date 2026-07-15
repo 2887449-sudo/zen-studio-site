@@ -98,6 +98,7 @@ export function AdminAuthGate({ children }: AdminAuthGateProps) {
           <Link href="/admin/episodes">剧集管理</Link>
           <Link href="/admin/hero">Hero 管理</Link>
           <Link href="/admin/media">素材管理</Link>
+          <Link href="/admin/import-export">导入导出</Link>
           <Link href="/admin/settings">网站设置</Link>
         </nav>
         <div className="admin-mode-banner">当前模式：{modeMessage}</div>
